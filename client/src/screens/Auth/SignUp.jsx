@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import AuthNavbar from '../../components/AuthNavbar';
+import api from '../../services/api';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -21,21 +23,38 @@ const SignUp = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('SignUp attempt:', formData);
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    
+    try {
+      const result = await api.register({
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password
+      });
+      console.log('Registration result:', result);
+      if (result.token) {
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
+        navigate('/user-dashboard');
+      } else {
+        alert(result.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Registration failed:', error);
+      alert('Registration failed. Please try again.');
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
-      <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg shadow-xl border border-slate-700 p-8 w-full max-w-md relative">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate('/')}
-          className="absolute top-4 left-4 text-gray-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+      <AuthNavbar />
+      <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg shadow-xl border border-slate-700 p-8 w-full max-w-md">
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">

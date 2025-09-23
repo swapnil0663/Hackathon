@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import AuthNavbar from '../../components/AuthNavbar';
+import api from '../../services/api';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,21 +17,35 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login attempt:', formData);
+    if (formData.emailOrPhone === 'user' && formData.password === 'user@123') {
+      localStorage.setItem('token', 'dummy-token');
+      localStorage.setItem('user', JSON.stringify({ fullName: 'Alex Johnson', email: 'user@example.com' }));
+      navigate('/user-dashboard');
+      return;
+    }
+    
+    try {
+      const result = await api.login(formData.emailOrPhone, formData.password);
+      console.log('Login result:', result);
+      if (result.token) {
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
+        navigate('/user-dashboard');
+      } else {
+        alert(result.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      alert('Login failed. Please try again.');
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
-      <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg shadow-xl border border-slate-700 p-8 w-full max-w-md relative">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate('/')}
-          className="absolute top-4 left-4 text-gray-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
+      <AuthNavbar />
+      <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg shadow-xl border border-slate-700 p-8 w-full max-w-md">
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Lock, CheckCircle, Users, BarChart3, Clock, FileText, Eye, ArrowRight } from 'lucide-react';
+import Navbar from '../../components/Navbar';
 
 export default function Landing() {
     const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function Landing() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+            <Navbar />
             {/* Hero Section */}
             <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
                 {/* Background Pattern */}
