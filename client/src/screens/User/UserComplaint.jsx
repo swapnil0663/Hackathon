@@ -71,7 +71,10 @@ const UserComplaint = () => {
               <Clock className="w-12 h-12 text-purple-400 mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">Complaint History</h3>
               <p className="text-gray-300 text-sm mb-4">Review all your past complaints and their resolution status.</p>
-              <button className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg transition-colors">
+              <button 
+                onClick={() => navigate('/complaint-history')}
+                className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg transition-colors"
+              >
                 View History
               </button>
             </div>

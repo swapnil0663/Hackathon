@@ -7,6 +7,7 @@ CREATE DATABASE complaintrack;
 -- Users table
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE NOT NULL,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     phone VARCHAR(20) UNIQUE NOT NULL,
@@ -23,6 +24,7 @@ CREATE TABLE complaints (
     title VARCHAR(200) NOT NULL,
     description TEXT NOT NULL,
     category VARCHAR(50) NOT NULL,
+    location VARCHAR(255),
     priority VARCHAR(20) DEFAULT 'medium',
     status VARCHAR(20) DEFAULT 'pending',
     assigned_to INTEGER REFERENCES users(id),

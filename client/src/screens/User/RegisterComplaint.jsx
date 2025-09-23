@@ -1,17 +1,24 @@
 import { useState } from 'react';
-import { MapPin, Upload } from 'lucide-react';
+import { MapPin, Upload, ChevronRight, Check } from 'lucide-react';
 import Layout from '../../components/Layout';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 
 const RegisterComplaint = () => {
   const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: '',
     location: ''
   });
+
+  const steps = [
+    { id: 1, title: 'Complaint Details' },
+    { id: 2, title: 'Location Information' },
+    { id: 3, title: 'Upload Supporting Evidence' }
+  ];
 
   const categories = [
     'Cybercrime',
@@ -29,13 +36,25 @@ const RegisterComplaint = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleNext = () => {
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSubmit = async () => {
     try {
       const result = await api.createComplaint({
         title: formData.title,
         description: formData.description,
         category: formData.category,
+        location: formData.location,
         priority: 'medium'
       });
       if (result.complaint) {
@@ -47,122 +66,195 @@ const RegisterComplaint = () => {
     }
   };
 
+  const isStepComplete = (stepId) => {
+    if (stepId === 1) return formData.title && formData.description && formData.category;
+    if (stepId === 2) return formData.location;
+    return false;
+  };
+
   return (
     <Layout userType="user">
       <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-white text-center mb-8">Register New Complaint</h1>
         
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Complaint Details */}
-          <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
-            <h2 className="text-xl font-semibold text-white mb-6">Complaint Details</h2>
-            
-            <div className="space-y-4">
+        {/* Progress Steps */}
+        <div className="mb-8">
+          <div className="flex items-center justify-center space-x-4">
+            {steps.map((step, index) => (
+              <div key={step.id} className="flex items-center">
+                <div className="flex items-center space-x-2">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    currentStep > step.id || isStepComplete(step.id)
+                      ? 'bg-green-600 text-white'
+                      : currentStep === step.id
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-600 text-gray-300'
+                  }`}>
+                    {currentStep > step.id || isStepComplete(step.id) ? (
+                      <Check size={16} />
+                    ) : (
+                      step.id
+                    )}
+                  </div>
+                  <span className={`text-sm font-medium ${
+                    currentStep > step.id || isStepComplete(step.id)
+                      ? 'text-green-400'
+                      : currentStep === step.id
+                      ? 'text-blue-400'
+                      : 'text-gray-400'
+                  }`}>
+                    {step.title}
+                  </span>
+                </div>
+                {index < steps.length - 1 && (
+                  <ChevronRight className="w-4 h-4 text-gray-500 ml-4" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="space-y-8">
+          {/* Step Content */}
+          {currentStep === 1 && (
+            <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
+              <h2 className="text-xl font-semibold text-white mb-6">Complaint Details</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Title of Complaint
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="Briefly summarize your complaint"
+                    className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Detailed Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Provide a detailed account of the issue, including dates, times, and involved parties."
+                    rows={4}
+                    className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Category
+                  </label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 2 && (
+            <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
+              <h2 className="text-xl font-semibold text-white mb-6">Location Information</h2>
+              
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Title of Complaint
+                  Location of Incident
                 </label>
                 <input
                   type="text"
-                  name="title"
-                  value={formData.title}
+                  name="location"
+                  value={formData.location}
                   onChange={handleInputChange}
-                  placeholder="Briefly summarize your complaint"
+                  placeholder="e.g., Street address, City, State/Province"
                   className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Detailed Description
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Provide a detailed account of the issue, including dates, times, and involved parties."
-                  rows={4}
-                  className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Category
-                </label>
-                <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Location Information */}
-          <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
-            <h2 className="text-xl font-semibold text-white mb-6">Location Information</h2>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Location of Incident
-              </label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                placeholder="e.g., Street address, City, State/Province"
-                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              
-              <button
-                type="button"
-                className="mt-3 flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                <MapPin size={16} />
-                <span>Auto-detect Current Location</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Upload Supporting Evidence */}
-          <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
-            <h2 className="text-xl font-semibold text-white mb-6">Upload Supporting Evidence</h2>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Upload Evidence
-              </label>
-              <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                
                 <button
                   type="button"
-                  className="text-blue-400 hover:text-blue-300 transition-colors"
+                  className="mt-3 flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors"
                 >
-                  Attach Files
+                  <MapPin size={16} />
+                  <span>Auto-detect Current Location</span>
                 </button>
-                <p className="text-gray-400 text-sm mt-2">
-                  Upload images, documents, or other evidence (Max 10MB)
-                </p>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium text-lg transition-colors"
-          >
-            Submit Complaint
-          </button>
-        </form>
+          {currentStep === 3 && (
+            <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
+              <h2 className="text-xl font-semibold text-white mb-6">Upload Supporting Evidence</h2>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Upload Evidence
+                </label>
+                <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center">
+                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <button
+                    type="button"
+                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    Attach Files
+                  </button>
+                  <p className="text-gray-400 text-sm mt-2">
+                    Upload images, documents, or other evidence (Max 10MB)
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation Buttons */}
+          <div className="flex justify-between">
+            <button
+              type="button"
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                currentStep === 1
+                  ? 'bg-slate-600 text-gray-400 cursor-not-allowed'
+                  : 'bg-slate-700 text-white hover:bg-slate-600'
+              }`}
+            >
+              Previous
+            </button>
+            
+            {currentStep < 3 ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Submit Complaint
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </Layout>
   );

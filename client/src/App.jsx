@@ -7,6 +7,8 @@ import Demo from './screens/Demo/Demo';
 import UserComplaint from './screens/User/UserComplaint';
 import RegisterComplaint from './screens/User/RegisterComplaint';
 import TrackComplaint from './screens/User/TrackComplaint';
+import User from './screens/User/User';
+import ComplaintHistory from './screens/User/ComplaintHistory';
 import Profile from './screens/User/Profile';
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
         <Route path="/user-dashboard" element={<UserComplaint />} />
         <Route path="/register-complaint" element={<RegisterComplaint />} />
         <Route path="/track-complaint" element={<TrackComplaint />} />
+        <Route path="/user/complaints" element={<User />} />
+        <Route path="/complaint-history" element={<ComplaintHistory />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>

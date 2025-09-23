@@ -4,19 +4,25 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
 const router = express.Router();
 
+// Generate next user ID starting from 7000
+const generateUserId = async () => {
+  try {
+    const result = await pool.query('SELECT COALESCE(MAX(user_id), 6999) + 1 as next_id FROM users WHERE user_id IS NOT NULL');
+    const nextId = result.rows[0].next_id;
+    return nextId;
+  } catch (error) {
+    console.error('❌ Error generating user ID:', error.message);
+    return 7000;
+  }
+};
+
 // Register
 router.post('/register', async (req, res) => {
   try {
     const { fullName, email, phone, password } = req.body;
-    console.log('🔵 Registration attempt:', { fullName, email, phone });
-
     if (!fullName || !email || !phone || !password) {
-      console.log('❌ Missing required fields');
       return res.status(400).json({ message: 'All fields are required' });
     }
-
-    // Check if user exists
-    console.log('🔍 Checking if user exists with email:', email);
     const userExists = await pool.query('SELECT * FROM users WHERE email = $1 OR phone = $2', [email, phone]);
     if (userExists.rows.length > 0) {
       console.log('❌ User already exists:', userExists.rows[0].email);
@@ -24,19 +30,29 @@ router.post('/register', async (req, res) => {
     }
 
     // Hash password
-    console.log('🔐 Hashing password...');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    
 
-    // Create user
-    console.log('💾 Inserting user into database...');
+    // Generate unique user ID
+    const userId = await generateUserId();    
+    if (!userId || userId === null || userId === undefined) {
+      throw new Error('Failed to generate user_id');
+    }
+    
     const newUser = await pool.query(
-      'INSERT INTO users (full_name, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING id, full_name, email, phone, created_at',
-      [fullName, email, phone, hashedPassword]
+      'INSERT INTO users (user_id, full_name, email, phone, password) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [userId, fullName, email, phone, hashedPassword]
     );
+    
+    if (!newUser.rows[0].user_id) {
+      console.error('❌ user_id is null in database response!');
+      throw new Error('user_id was not properly set in database');
+    }
 
     console.log('✅ User created successfully in database:', {
       id: newUser.rows[0].id,
+      userId: newUser.rows[0].user_id,
       fullName: newUser.rows[0].full_name,
       email: newUser.rows[0].email,
       createdAt: newUser.rows[0].created_at
@@ -54,6 +70,7 @@ router.post('/register', async (req, res) => {
       'INSERT INTO user_sessions (session_id, user_id, user_data, expires_at) VALUES ($1, $2, $3, $4)',
       [token, newUser.rows[0].id, JSON.stringify({
         id: newUser.rows[0].id,
+        userId: newUser.rows[0].user_id,
         fullName: newUser.rows[0].full_name,
         email: newUser.rows[0].email,
         phone: newUser.rows[0].phone,
@@ -61,13 +78,12 @@ router.post('/register', async (req, res) => {
       }), new Date(Date.now() + 24 * 60 * 60 * 1000)]
     );
 
-    console.log('🎫 JWT token created and stored for user ID:', newUser.rows[0].id);
-
     res.status(201).json({
       message: 'User created successfully',
       token,
       user: {
         id: newUser.rows[0].id,
+        userId: newUser.rows[0].user_id,
         fullName: newUser.rows[0].full_name,
         email: newUser.rows[0].email,
         phone: newUser.rows[0].phone,
@@ -85,17 +101,13 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { emailOrPhone, password } = req.body;
-    console.log('🔑 Login attempt for:', emailOrPhone);
-
     if (!emailOrPhone || !password) {
       console.log('❌ Missing login credentials');
       return res.status(400).json({ message: 'Email/phone and password are required' });
     }
 
-    // Find user by email or phone
-    console.log('🔍 Searching for user in database:', emailOrPhone);
     const user = await pool.query(
-      'SELECT * FROM users WHERE email = $1 OR phone = $1',
+      'SELECT id, user_id, full_name, email, phone, password, role, created_at FROM users WHERE email = $1 OR phone = $1',
       [emailOrPhone]
     );
 
@@ -111,15 +123,13 @@ router.post('/login', async (req, res) => {
       createdAt: user.rows[0].created_at
     });
 
-    // Check password
-    console.log('🔐 Verifying password...');
+
     const isMatch = await bcrypt.compare(password, user.rows[0].password);
     if (!isMatch) {
       console.log('❌ Password verification failed for:', emailOrPhone);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    console.log('✅ Password verified successfully');
 
     // Generate JWT token
     const token = jwt.sign(
@@ -133,6 +143,7 @@ router.post('/login', async (req, res) => {
       'INSERT INTO user_sessions (session_id, user_id, user_data, expires_at) VALUES ($1, $2, $3, $4)',
       [token, user.rows[0].id, JSON.stringify({
         id: user.rows[0].id,
+        userId: user.rows[0].user_id,
         fullName: user.rows[0].full_name,
         email: user.rows[0].email,
         phone: user.rows[0].phone,
@@ -147,6 +158,7 @@ router.post('/login', async (req, res) => {
       token,
       user: {
         id: user.rows[0].id,
+        userId: user.rows[0].user_id,
         fullName: user.rows[0].full_name,
         email: user.rows[0].email,
         phone: user.rows[0].phone,

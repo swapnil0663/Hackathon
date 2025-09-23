@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye } from 'lucide-react';
+import { Search, Eye, List } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../services/api';
 
@@ -7,21 +8,40 @@ const TrackComplaint = () => {
   const [searchId, setSearchId] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
+        setLoading(true);
         const data = await api.getComplaints();
-        const formattedComplaints = data.map(complaint => ({
-          id: `CT${complaint.id}`,
-          title: complaint.title,
-          date: new Date(complaint.created_at).toLocaleDateString(),
-          status: complaint.status,
-          statusColor: getStatusColor(complaint.status)
-        }));
-        setComplaints(formattedComplaints);
+        if (Array.isArray(data)) {
+          const formattedComplaints = data.map(complaint => ({
+            id: complaint.complaint_id || `CMP${String(complaint.id).padStart(6, '0')}`,
+            originalId: complaint.id,
+            title: complaint.title,
+            date: new Date(complaint.created_at).toLocaleDateString(),
+            status: complaint.status,
+            statusColor: getStatusColor(complaint.status),
+            category: complaint.category,
+            priority: complaint.priority,
+            location: complaint.location
+          }));
+          setComplaints(formattedComplaints);
+        } else {
+          console.error('Invalid data format received:', data);
+          setComplaints([]);
+        }
       } catch (error) {
         console.error('Failed to fetch complaints:', error);
+        setComplaints([]);
+        // Check if it's an authentication error
+        if (error.message?.includes('401') || error.response?.status === 401) {
+          // Redirect to login or show authentication error
+          console.log('User not authenticated, please login');
+        }
+      } finally {
+        setLoading(false);
       }
     };
     fetchComplaints();
@@ -29,28 +49,32 @@ const TrackComplaint = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-blue-500';
-      case 'in_progress': return 'bg-orange-500';
-      case 'resolved': return 'bg-green-500';
-      case 'closed': return 'bg-gray-500';
-      default: return 'bg-blue-500';
+      case 'pending': return 'bg-yellow-500 text-yellow-900';
+      case 'in_progress': return 'bg-blue-500 text-blue-900';
+      case 'resolved': return 'bg-green-500 text-green-900';
+      case 'closed': return 'bg-gray-500 text-gray-900';
+      default: return 'bg-yellow-500 text-yellow-900';
     }
   };
 
-  const timeline = [
-    { status: 'Complaint Submitted', date: 'March 10, 10:30 AM', description: 'Your complaint has been successfully registered in our system.', active: true },
-    { status: 'Under Review', date: 'March 10, 2:15 PM', description: 'Our team is currently reviewing the details of your complaint.', active: true },
-    { status: 'Investigation Ongoing', date: 'March 11, 9:00 AM', description: 'The relevant department is actively investigating the issue. Further updates will be provided soon.', active: false },
-    { status: 'Additional Information Requested', date: 'March 12, 11:45 AM', description: 'We require more details to proceed with the investigation. Please check your messages.', active: false },
-    { status: 'Resolution Proposed', date: 'March 13, 3:30 PM', description: 'Our team has reviewed the case and is awaiting your confirmation.', active: false },
-    { status: 'Complaint Resolved', date: 'March 14, 4:20 PM', description: 'Your complaint has been successfully resolved to your satisfaction.', active: false }
-  ];
+
 
   return (
     <Layout userType="user">
       <div className="p-6 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-2">Track Complaint Status</h1>
-        <p className="text-gray-300 mb-8">Monitor the progress of your complaints in real-time.</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Track Complaint Status</h1>
+            <p className="text-gray-300">Monitor the progress of your complaints in real-time.</p>
+          </div>
+          <Link 
+            to="/user/complaints" 
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+          >
+            <List size={16} />
+            View All Complaints
+          </Link>
+        </div>
 
         {/* Search Section */}
         <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700 mb-8">
@@ -84,66 +108,46 @@ const TrackComplaint = () => {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* All Complaints */}
-          <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
-            <h2 className="text-lg font-semibold text-white mb-4">All Complaints</h2>
-            <p className="text-gray-300 text-sm mb-6">Overview of your submitted complaints.</p>
+        {/* All Complaints */}
+        <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
+          <h2 className="text-lg font-semibold text-white mb-4">All Complaints</h2>
+          <p className="text-gray-300 text-sm mb-6">Overview of your submitted complaints. Click "View Details" for progress timeline.</p>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-4 gap-4 text-sm font-medium text-gray-300 pb-2 border-b border-slate-600">
+              <span>Complaint ID</span>
+              <span>Title</span>
+              <span>Submission Date</span>
+              <span>Status</span>
+            </div>
             
-            <div className="space-y-4">
-              <div className="grid grid-cols-4 gap-4 text-sm font-medium text-gray-300 pb-2 border-b border-slate-600">
-                <span>Complaint ID</span>
-                <span>Title</span>
-                <span>Submission Date</span>
-                <span>Status</span>
-              </div>
-              
-              {complaints.map((complaint) => (
-                <div key={complaint.id} className="grid grid-cols-4 gap-4 text-sm text-gray-300 py-2">
-                  <span className="text-blue-400">{complaint.id}</span>
-                  <span>{complaint.title}</span>
-                  <span>{complaint.date}</span>
+            {loading ? (
+              <div className="text-center py-8 text-gray-400">Loading complaints...</div>
+            ) : complaints.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">No complaints found. Please login or create a complaint first.</div>
+            ) : (
+              complaints.map((complaint) => (
+                <div key={complaint.originalId} className="grid grid-cols-4 gap-4 text-sm text-gray-300 py-3 hover:bg-slate-700/30 rounded px-2 transition-colors">
+                  <span className="text-blue-400 font-mono">{complaint.id}</span>
+                  <div>
+                    <div className="font-medium">{complaint.title}</div>
+                    <div className="text-xs text-gray-400">{complaint.category}</div>
+                  </div>
+                  <div>
+                    <div>{complaint.date}</div>
+                    {complaint.location && <div className="text-xs text-gray-400">{complaint.location}</div>}
+                  </div>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded text-xs text-white ${complaint.statusColor}`}>
-                      {complaint.status}
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${complaint.statusColor}`}>
+                      {complaint.status.replace('_', ' ').toUpperCase()}
                     </span>
-                    <button className="text-blue-400 hover:text-blue-300">
+                    <Link to="/user/complaints" className="text-blue-400 hover:text-blue-300">
                       <Eye size={16} />
-                    </button>
+                    </Link>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Complaint Progress Timeline */}
-          <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
-            <h2 className="text-lg font-semibold text-white mb-4">Complaint Progress Timeline</h2>
-            
-            <div className="space-y-6">
-              {timeline.map((step, index) => (
-                <div key={index} className="flex items-start gap-4">
-                  <div className={`w-3 h-3 rounded-full mt-1 ${step.active ? 'bg-blue-500' : 'bg-gray-500'}`}></div>
-                  <div className="flex-1">
-                    <h3 className={`font-medium ${step.active ? 'text-blue-400' : 'text-gray-400'}`}>
-                      {step.status}
-                    </h3>
-                    <p className="text-xs text-gray-400 mb-1">{step.date}</p>
-                    <p className="text-sm text-gray-300">{step.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 p-4 bg-slate-700/30 rounded-lg text-center">
-              <h3 className="text-white font-medium mb-2">Need Assistance?</h3>
-              <p className="text-gray-300 text-sm mb-3">
-                If you have further questions or require direct support, chat with an officer.
-              </p>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm transition-colors">
-                Chat with Officer
-              </button>
-            </div>
+              ))
+            )}
           </div>
         </div>
       </div>

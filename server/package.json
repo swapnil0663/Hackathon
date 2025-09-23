@@ -21,6 +21,8 @@
     "pg": "^8.8.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "@locator/babel-jsx": "^0.4.4",
+    "@locator/runtime": "^0.4.4",
+    "nodemon": "^2.0.22"
   }
 }

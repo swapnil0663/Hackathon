@@ -9,7 +9,7 @@ const UserSidebar = () => {
     { icon: Plus, label: 'New Complaint', path: '/register-complaint' },
     { icon: FileText, label: 'My Complaints', path: '/user-dashboard' },
     { icon: Clock, label: 'Track Status', path: '/track-complaint' },
-    { icon: CheckCircle, label: 'Resolved', path: '/resolved-complaints' },
+    { icon: CheckCircle, label: 'Resolved', path: '/complaint-history' },
     { icon: AlertCircle, label: 'Urgent', path: '/urgent-complaints' },
   ];
 
