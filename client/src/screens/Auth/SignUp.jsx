@@ -1,0 +1,186 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+
+const SignUp = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('SignUp attempt:', formData);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
+      <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg shadow-xl border border-slate-700 p-8 w-full max-w-md relative">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/')}
+          className="absolute top-4 left-4 text-gray-400 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        {/* Logo and Title */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 text-2xl font-bold">
+              ✱ ComplainTrack
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">Create Account</h1>
+          <p className="text-gray-300 text-sm">Join ComplainTrack today</p>
+        </div>
+
+        {/* SignUp Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Full Name
+            </label>
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              placeholder="Enter your full name"
+              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Enter your email address"
+              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              placeholder="Enter your phone number"
+              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Create a password"
+                className="w-full px-3 py-2 pr-10 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4 text-gray-300" />
+                ) : (
+                  <Eye className="h-4 w-4 text-gray-300" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Confirm your password"
+                className="w-full px-3 py-2 pr-10 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-4 w-4 text-gray-300" />
+                ) : (
+                  <Eye className="h-4 w-4 text-gray-300" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium mt-6 transition-all duration-300"
+          >
+            Create Account
+          </button>
+
+          <div className="text-center text-gray-400 text-sm">OR</div>
+
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="w-full border border-blue-500 text-blue-400 py-2 px-4 rounded-md hover:bg-blue-500/10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium transition-all duration-300"
+          >
+            Already have an account? Login
+          </button>
+
+          <button
+            type="button"
+            className="w-full border border-cyan-500 text-cyan-400 py-2 px-4 rounded-md hover:bg-cyan-500/10 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 font-medium transition-all duration-300"
+          >
+            Sign Up with OTP
+          </button>
+        </form>
+
+        <p className="text-xs text-gray-400 text-center mt-4">
+          By creating an account, you agree to our Terms of Service and Privacy Policy
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default SignUp;
