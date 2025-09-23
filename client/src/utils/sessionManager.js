@@ -1,40 +1,51 @@
-// Token management utility to replace localStorage
 class TokenManager {
   constructor() {
-    this.token = null;
-    this.user = null;
+    this.loadFromStorage();
   }
 
-  // Set token and user data
   setToken(token, user) {
     this.token = token;
     this.user = user;
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
   }
 
-  // Get token
   getToken() {
-    return this.token;
+    return this.token || localStorage.getItem('token');
   }
 
-  // Get user data
   getUser() {
+    if (!this.user && localStorage.getItem('user')) {
+      this.user = JSON.parse(localStorage.getItem('user'));
+    }
     return this.user;
   }
 
-  // Update user data
   updateUser(userData) {
     this.user = { ...this.user, ...userData };
+    localStorage.setItem('user', JSON.stringify(this.user));
   }
 
-  // Clear token and user
   clearToken() {
     this.token = null;
     this.user = null;
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 
-  // Check if user is authenticated
   isAuthenticated() {
-    return this.token !== null && this.user !== null;
+    return !!this.getToken() && !!this.getUser();
+  }
+
+  loadFromStorage() {
+    this.token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    this.user = userData ? JSON.parse(userData) : null;
+  }
+
+  getUserRole() {
+    const user = this.getUser();
+    return user?.role || 'user';
   }
 }
 

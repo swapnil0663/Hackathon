@@ -51,11 +51,11 @@ const User = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-500 text-yellow-900';
-      case 'in_progress': return 'bg-blue-500 text-blue-900';
-      case 'resolved': return 'bg-green-500 text-green-900';
-      case 'closed': return 'bg-gray-500 text-gray-900';
-      default: return 'bg-yellow-500 text-yellow-900';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+      case 'in_progress': return 'bg-blue-100 text-blue-800 border border-blue-200';
+      case 'resolved': return 'bg-green-100 text-green-800 border border-green-200';
+      case 'closed': return 'bg-gray-100 text-gray-800 border border-gray-200';
+      default: return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
     }
   };
 
@@ -114,123 +114,115 @@ const User = () => {
   return (
     <Layout userType="user">
       <div className="p-6 max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-10">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">My Complaints</h1>
-            <p className="text-gray-300">View and track all your submitted complaints</p>
+            <h1 className="text-4xl font-bold text-gray-800 mb-3">
+              My Complaints
+            </h1>
+            <p className="text-gray-600 text-lg">Monitor the progress of your complaints in real-time</p>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-blue-400">{complaints.length}</div>
-            <div className="text-sm text-gray-400">Total Complaints</div>
-          </div>
+          <Link to="/register-complaint" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+            View All Complaints
+          </Link>
         </div>
 
         {/* Search and Filter Section */}
-        <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700 mb-6">
+        <div className="bg-white p-6 rounded-xl border border-gray-200 mb-8 shadow-sm">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Search Complaints</h2>
+          <p className="text-gray-600 mb-6">Find complaints by ID or filter by status.</p>
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by Complaint ID, Title, or Category..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter Complaint ID"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            <div className="flex gap-2">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
-              </select>
-            </div>
+            <button className="bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+              Search
+            </button>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
           </div>
         </div>
 
-        {/* Complaints Grid */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400">Loading complaints...</div>
+        {/* Complaints Section */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800">All Complaints</h2>
+            <p className="text-gray-600 mt-1">Overview of your submitted complaints. Click "View Details" for progress timeline.</p>
           </div>
-        ) : filteredComplaints.length === 0 ? (
-          <div className="text-center py-12">
-            <AlertCircle className="mx-auto mb-4 text-gray-400" size={48} />
-            <div className="text-gray-400">No complaints found</div>
-          </div>
-        ) : (
-          <div className="grid gap-6">
-            {filteredComplaints.map((complaint) => (
-              <div key={complaint.id} className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 hover:bg-slate-800/70 transition-colors">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-white">{complaint.title}</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(complaint.status)}`}>
-                        {complaint.status.replace('_', ' ').toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-400 mb-3">
-                      <span className="text-blue-400 font-mono">{complaint.complaint_id || `CMP${String(complaint.id).padStart(6, '0')}`}</span>
-                      <span className="flex items-center gap-1">
-                        <Calendar size={14} />
-                        {formatDate(complaint.created_at)}
-                      </span>
-                      {complaint.location && (
-                        <span className="flex items-center gap-1">
-                          <MapPin size={14} />
-                          {complaint.location}
-                        </span>
-                      )}
-                      <span className={`flex items-center gap-1 ${getPriorityColor(complaint.priority)}`}>
-                        <AlertCircle size={14} />
-                        {complaint.priority} priority
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setSelectedComplaint(complaint)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
-                  >
-                    <Eye size={16} />
-                    View Details
-                  </button>
-                </div>
-                
-                <div className="mb-4">
-                  <div className="text-sm text-gray-300 mb-2">
-                    <span className="font-medium">Category:</span> {complaint.category}
-                  </div>
-                  <p className="text-gray-300 text-sm line-clamp-2">{complaint.description}</p>
-                </div>
-
-                {complaint.resolution && (
-                  <div className="bg-green-900/20 border border-green-700/50 rounded-md p-3">
-                    <div className="text-sm font-medium text-green-400 mb-1">Resolution:</div>
-                    <p className="text-sm text-green-300">{complaint.resolution}</p>
-                  </div>
-                )}
+          
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="text-gray-600">Loading complaints...</div>
+            </div>
+          ) : filteredComplaints.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-gray-500 text-lg mb-2">No complaints found. Create a complaint first</div>
+            </div>
+          ) : (
+            <div className="p-6">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 text-gray-600 font-medium">Complaint ID</th>
+                      <th className="text-left py-3 text-gray-600 font-medium">Title</th>
+                      <th className="text-left py-3 text-gray-600 font-medium">Submission Date</th>
+                      <th className="text-left py-3 text-gray-600 font-medium">Status</th>
+                      <th className="text-left py-3 text-gray-600 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredComplaints.map((complaint) => (
+                      <tr key={complaint.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-4 text-gray-800 font-mono">{complaint.complaint_id || `CMP${String(complaint.id).padStart(6, '0')}`}</td>
+                        <td className="py-4 text-gray-800">{complaint.title}</td>
+                        <td className="py-4 text-gray-600">{formatDate(complaint.created_at)}</td>
+                        <td className="py-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(complaint.status)}`}>
+                            {complaint.status.replace('_', ' ').toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="py-4">
+                          <button
+                            onClick={() => setSelectedComplaint(complaint)}
+                            className="text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
 
         {/* Complaint Detail Modal */}
         {selectedComplaint && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-slate-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6 border-b border-slate-700">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b border-gray-200">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h2 className="text-xl font-bold text-white mb-2">{selectedComplaint.title}</h2>
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">{selectedComplaint.title}</h2>
                     <div className="flex items-center gap-3">
-                      <span className="text-blue-400 font-mono">{selectedComplaint.complaint_id || `CMP${String(selectedComplaint.id).padStart(6, '0')}`}</span>
+                      <span className="text-blue-600 font-mono">{selectedComplaint.complaint_id || `CMP${String(selectedComplaint.id).padStart(6, '0')}`}</span>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedComplaint.status)}`}>
                         {selectedComplaint.status.replace('_', ' ').toUpperCase()}
                       </span>
@@ -238,7 +230,7 @@ const User = () => {
                   </div>
                   <button
                     onClick={() => setSelectedComplaint(null)}
-                    className="text-gray-400 hover:text-white"
+                    className="text-gray-400 hover:text-gray-600"
                   >
                     ✕
                   </button>
@@ -248,63 +240,63 @@ const User = () => {
               <div className="p-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-400">Category</label>
-                    <p className="text-white">{selectedComplaint.category}</p>
+                    <label className="text-sm font-medium text-gray-600">Category</label>
+                    <p className="text-gray-800">{selectedComplaint.category}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-400">Priority</label>
-                    <p className={`capitalize ${getPriorityColor(selectedComplaint.priority)}`}>{selectedComplaint.priority}</p>
+                    <label className="text-sm font-medium text-gray-600">Priority</label>
+                    <p className="capitalize text-gray-800">{selectedComplaint.priority}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-400">Location</label>
-                    <p className="text-white">{selectedComplaint.location || 'Not specified'}</p>
+                    <label className="text-sm font-medium text-gray-600">Location</label>
+                    <p className="text-gray-800">{selectedComplaint.location || 'Not specified'}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-400">Submitted</label>
-                    <p className="text-white">{formatDate(selectedComplaint.created_at)}</p>
+                    <label className="text-sm font-medium text-gray-600">Submitted</label>
+                    <p className="text-gray-800">{formatDate(selectedComplaint.created_at)}</p>
                   </div>
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium text-gray-400">Description</label>
-                  <p className="text-white mt-1">{selectedComplaint.description}</p>
+                  <label className="text-sm font-medium text-gray-600">Description</label>
+                  <p className="text-gray-800 mt-1">{selectedComplaint.description}</p>
                 </div>
 
                 {selectedComplaint.resolution && (
                   <div>
-                    <label className="text-sm font-medium text-gray-400">Resolution</label>
-                    <div className="bg-green-900/20 border border-green-700/50 rounded-md p-3 mt-1">
-                      <p className="text-green-300">{selectedComplaint.resolution}</p>
+                    <label className="text-sm font-medium text-gray-600">Resolution</label>
+                    <div className="bg-green-50 border border-green-200 rounded-md p-3 mt-1">
+                      <p className="text-green-800">{selectedComplaint.resolution}</p>
                     </div>
                   </div>
                 )}
                 
                 {/* Complaint Progress Timeline */}
                 <div className="mt-6">
-                  <label className="text-sm font-medium text-gray-400 mb-4 block">Progress Timeline</label>
-                  <div className="bg-slate-700/30 rounded-lg p-4">
+                  <label className="text-sm font-medium text-gray-600 mb-4 block">Progress Timeline</label>
+                  <div className="bg-gray-50 rounded-lg p-4">
                     <div className="space-y-4">
                       {getTimelineForStatus(selectedComplaint.status).map((step, index) => (
                         <div key={index} className="flex items-start gap-3">
                           <div className={`w-3 h-3 rounded-full mt-1 flex-shrink-0 ${
-                            step.active ? 'bg-blue-500' : step.completed ? 'bg-green-500' : 'bg-gray-500'
+                            step.active ? 'bg-blue-500' : step.completed ? 'bg-green-500' : 'bg-gray-300'
                           }`}></div>
                           <div className="flex-1 min-w-0">
                             <h4 className={`text-sm font-medium ${
-                              step.active ? 'text-blue-400' : step.completed ? 'text-green-400' : 'text-gray-400'
+                              step.active ? 'text-blue-600' : step.completed ? 'text-green-600' : 'text-gray-500'
                             }`}>
                               {step.status}
                             </h4>
                             {step.date && <p className="text-xs text-gray-500 mt-1">{step.date}</p>}
-                            <p className="text-xs text-gray-300 mt-1">{step.description}</p>
+                            <p className="text-xs text-gray-600 mt-1">{step.description}</p>
                           </div>
                         </div>
                       ))}
                     </div>
                     
-                    <div className="mt-6 p-3 bg-slate-600/30 rounded-md text-center">
-                      <h4 className="text-white font-medium text-sm mb-2">Need Assistance?</h4>
-                      <p className="text-gray-300 text-xs mb-3">
+                    <div className="mt-6 p-3 bg-white border border-gray-200 rounded-md text-center">
+                      <h4 className="text-gray-800 font-medium text-sm mb-2">Need Assistance?</h4>
+                      <p className="text-gray-600 text-xs mb-3">
                         If you have questions about your complaint progress, contact support.
                       </p>
                       <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs transition-colors">

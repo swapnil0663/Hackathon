@@ -20,18 +20,37 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Admin login
+    if (formData.emailOrPhone === 'admin' && formData.password === 'admin@123') {
+      const adminToken = 'admin-jwt-token-' + Date.now();
+      tokenManager.setToken(adminToken, { 
+        fullName: 'Admin User', 
+        email: 'admin@example.com', 
+        role: 'admin' 
+      });
+      navigate('/admin-dashboard');
+      return;
+    }
+    
+    // User login
     if (formData.emailOrPhone === 'user' && formData.password === 'user@123') {
-      tokenManager.setToken('dummy-token', { fullName: 'Alex Johnson', email: 'user@example.com' });
+      const userToken = 'user-jwt-token-' + Date.now();
+      tokenManager.setToken(userToken, { 
+        fullName: 'Alex Johnson', 
+        email: 'user@example.com', 
+        role: 'user' 
+      });
       navigate('/user-dashboard');
       return;
     }
     
     try {
       const result = await api.login(formData.emailOrPhone, formData.password);
-      console.log('Login result:', result);
       if (result.token) {
         tokenManager.setToken(result.token, result.user);
-        navigate('/user-dashboard');
+        const userRole = result.user?.role || 'user';
+        navigate(userRole === 'admin' ? '/admin-dashboard' : '/user-dashboard');
       } else {
         alert(result.message || 'Login failed');
       }
@@ -42,24 +61,23 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center p-4">
       <AuthNavbar />
-      <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg shadow-xl border border-slate-700 p-8 w-full max-w-md">
+      <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-8 w-full max-w-md">
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <div className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 text-2xl font-bold">
-              ✱ ComplainTrack
+              ✱ ComplainTrack  
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Welcome to</h1>
-          <h2 className="text-2xl font-bold text-white">ComplainTrack</h2>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome </h1>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Email or Phone
             </label>
             <input
@@ -68,12 +86,12 @@ const Login = () => {
               value={formData.emailOrPhone}
               onChange={handleInputChange}
               placeholder="Enter your email or phone number"
-              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
             <input
@@ -82,12 +100,12 @@ const Login = () => {
               value={formData.password}
               onChange={handleInputChange}
               placeholder="Enter your password"
-              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div className="text-left">
-            <a href="#" className="text-blue-400 text-sm hover:text-cyan-400 transition-colors">
+            <a href="#" className="text-blue-600 text-sm hover:text-blue-800 transition-colors">
               Forgot Password?
             </a>
           </div>
@@ -99,19 +117,19 @@ const Login = () => {
             Login
           </button>
 
-          <div className="text-center text-gray-400 text-sm">OR</div>
+          <div className="text-center text-gray-600 text-sm">OR</div>
 
           <button
             type="button"
             onClick={() => navigate('/register')}
-            className="w-full border border-blue-500 text-blue-400 py-2 px-4 rounded-md hover:bg-blue-500/10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium transition-all duration-300"
+            className="w-full border border-blue-500 text-blue-600 py-2 px-4 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium transition-all duration-300"
           >
             Register
           </button>
 
           <button
             type="button"
-            className="w-full border border-cyan-500 text-cyan-400 py-2 px-4 rounded-md hover:bg-cyan-500/10 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 font-medium transition-all duration-300"
+            className="w-full border border-cyan-500 text-cyan-600 py-2 px-4 rounded-md hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 font-medium transition-all duration-300"
           >
             Login with OTP
           </button>

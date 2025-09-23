@@ -2,11 +2,11 @@ import Navbar from './Navbar';
 
 const BaseLayout = ({ children, showSidebar = false, sidebarComponent = null }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <Navbar />
-      <div className="flex">
+      <div className="flex pt-16">
         {showSidebar && sidebarComponent}
-        <main className={`flex-1 ${showSidebar ? '' : 'p-6'}`}>
+        <main className={`flex-1 ${showSidebar ? 'ml-64' : 'p-6'}`}>
           {children}
         </main>
       </div>

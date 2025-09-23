@@ -75,7 +75,7 @@ const RegisterComplaint = () => {
   return (
     <Layout userType="user">
       <div className="p-6 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-white text-center mb-8">Register New Complaint</h1>
+        <h1 className="text-3xl font-bold text-gray-800 text-center mb-8">Register New Complaint</h1>
         
         {/* Progress Steps */}
         <div className="mb-8">
@@ -88,7 +88,7 @@ const RegisterComplaint = () => {
                       ? 'bg-green-600 text-white'
                       : currentStep === step.id
                       ? 'bg-blue-600 text-white'
-                      : 'bg-slate-600 text-gray-300'
+                      : 'bg-gray-300 text-gray-600'
                   }`}>
                     {currentStep > step.id || isStepComplete(step.id) ? (
                       <Check size={16} />
@@ -98,10 +98,10 @@ const RegisterComplaint = () => {
                   </div>
                   <span className={`text-sm font-medium ${
                     currentStep > step.id || isStepComplete(step.id)
-                      ? 'text-green-400'
+                      ? 'text-green-600'
                       : currentStep === step.id
-                      ? 'text-blue-400'
-                      : 'text-gray-400'
+                      ? 'text-blue-600'
+                      : 'text-gray-600'
                   }`}>
                     {step.title}
                   </span>
@@ -117,12 +117,12 @@ const RegisterComplaint = () => {
         <div className="space-y-8">
           {/* Step Content */}
           {currentStep === 1 && (
-            <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
-              <h2 className="text-xl font-semibold text-white mb-6">Complaint Details</h2>
+            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+              <h2 className="text-xl font-semibold text-gray-800 mb-6">Complaint Details</h2>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Title of Complaint
                   </label>
                   <input
@@ -131,12 +131,12 @@ const RegisterComplaint = () => {
                     value={formData.title}
                     onChange={handleInputChange}
                     placeholder="Briefly summarize your complaint"
-                    className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Detailed Description
                   </label>
                   <textarea
@@ -145,19 +145,19 @@ const RegisterComplaint = () => {
                     onChange={handleInputChange}
                     placeholder="Provide a detailed account of the issue, including dates, times, and involved parties."
                     rows={4}
-                    className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Category
                   </label>
                   <select
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select a category</option>
                     {categories.map((cat) => (
@@ -170,11 +170,11 @@ const RegisterComplaint = () => {
           )}
 
           {currentStep === 2 && (
-            <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
-              <h2 className="text-xl font-semibold text-white mb-6">Location Information</h2>
+            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+              <h2 className="text-xl font-semibold text-gray-800 mb-6">Location Information</h2>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Location of Incident
                 </label>
                 <input
@@ -183,12 +183,12 @@ const RegisterComplaint = () => {
                   value={formData.location}
                   onChange={handleInputChange}
                   placeholder="e.g., Street address, City, State/Province"
-                  className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 
                 <button
                   type="button"
-                  className="mt-3 flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors"
+                  className="mt-3 flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
                 >
                   <MapPin size={16} />
                   <span>Auto-detect Current Location</span>
@@ -198,22 +198,22 @@ const RegisterComplaint = () => {
           )}
 
           {currentStep === 3 && (
-            <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
-              <h2 className="text-xl font-semibold text-white mb-6">Upload Supporting Evidence</h2>
+            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+              <h2 className="text-xl font-semibold text-gray-800 mb-6">Upload Supporting Evidence</h2>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Upload Evidence
                 </label>
-                <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                   <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <button
                     type="button"
-                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                    className="text-blue-600 hover:text-blue-800 transition-colors"
                   >
                     Attach Files
                   </button>
-                  <p className="text-gray-400 text-sm mt-2">
+                  <p className="text-gray-500 text-sm mt-2">
                     Upload images, documents, or other evidence (Max 10MB)
                   </p>
                 </div>
@@ -229,8 +229,8 @@ const RegisterComplaint = () => {
               disabled={currentStep === 1}
               className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                 currentStep === 1
-                  ? 'bg-slate-600 text-gray-400 cursor-not-allowed'
-                  : 'bg-slate-700 text-white hover:bg-slate-600'
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-gray-600 text-white hover:bg-gray-700'
               }`}
             >
               Previous

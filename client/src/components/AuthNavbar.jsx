@@ -5,19 +5,15 @@ const AuthNavbar = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="absolute top-0 left-0 right-0 z-10 p-6">
+    <nav className="fixed top-0 left-0 right-0 z-20 p-6 bg-white border-b border-gray-200">
       <div className="flex justify-between items-center">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-indigo-50 text-indigo-600 transition-colors border border-gray-800 hover:border-indigo-200"
         >
           <ArrowLeft size={20} />
           <span>Back to Home</span>
         </button>
-        
-        <div className="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-          Complaint Track
-        </div>
       </div>
     </nav>
   );

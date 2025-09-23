@@ -10,6 +10,8 @@ import TrackComplaint from './screens/User/TrackComplaint';
 import User from './screens/User/User';
 import ComplaintHistory from './screens/User/ComplaintHistory';
 import Profile from './screens/User/Profile';
+import AdminLayout from './screens/Cyber/AdminLayout';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -19,12 +21,41 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<SignUp />} />
         <Route path="/demo" element={<Demo />} />
-        <Route path="/user-dashboard" element={<UserComplaint />} />
-        <Route path="/register-complaint" element={<RegisterComplaint />} />
-        <Route path="/track-complaint" element={<TrackComplaint />} />
-        <Route path="/user/complaints" element={<User />} />
-        <Route path="/complaint-history" element={<ComplaintHistory />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/admin-dashboard" element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminLayout />
+          </ProtectedRoute>
+        } />
+        <Route path="/user-dashboard" element={
+          <ProtectedRoute requiredRole="user">
+            <UserComplaint />
+          </ProtectedRoute>
+        } />
+        <Route path="/register-complaint" element={
+          <ProtectedRoute requiredRole="user">
+            <RegisterComplaint />
+          </ProtectedRoute>
+        } />
+        <Route path="/track-complaint" element={
+          <ProtectedRoute requiredRole="user">
+            <TrackComplaint />
+          </ProtectedRoute>
+        } />
+        <Route path="/user/complaints" element={
+          <ProtectedRoute requiredRole="user">
+            <User />
+          </ProtectedRoute>
+        } />
+        <Route path="/complaint-history" element={
+          <ProtectedRoute requiredRole="user">
+            <ComplaintHistory />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute requiredRole="user">
+            <Profile />
+          </ProtectedRoute>
+        } />
       </Routes>
     </Router>
   );

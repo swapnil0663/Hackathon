@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
 require('dotenv').config();
 const pool = require('./config/database');
 
@@ -7,6 +9,13 @@ const authRoutes = require('./routes/auth');
 const complaintRoutes = require('./routes/complaints');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST']
+  }
+});
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -43,6 +52,19 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working!', timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('👤 Admin connected:', socket.id);
+
+  socket.on('disconnect', () => {
+    console.log('👋 Admin disconnected:', socket.id);
+  });
+});
+
+// Make io available globally
+app.set('io', io);
+
+server.listen(PORT, () => {
   console.log('🚀 Server running on port', PORT);
+  console.log('🔌 Socket.IO enabled for real-time notifications');
 });

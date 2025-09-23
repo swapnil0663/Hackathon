@@ -52,9 +52,9 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center p-4">
       <AuthNavbar />
-      <div className="bg-slate-800/80 backdrop-blur-sm rounded-lg shadow-xl border border-slate-700 p-8 w-full max-w-md">
+      <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-8 w-full max-w-md">
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
@@ -62,14 +62,13 @@ const SignUp = () => {
               ✱ ComplainTrack
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Create Account</h1>
-          <p className="text-gray-300 text-sm">Join ComplainTrack today</p>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Create Account</h1>
         </div>
 
         {/* SignUp Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Full Name
             </label>
             <input
@@ -78,13 +77,13 @@ const SignUp = () => {
               value={formData.fullName}
               onChange={handleInputChange}
               placeholder="Enter your full name"
-              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Email Address
             </label>
             <input
@@ -93,13 +92,13 @@ const SignUp = () => {
               value={formData.email}
               onChange={handleInputChange}
               placeholder="Enter your email address"
-              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Phone Number
             </label>
             <input
@@ -108,13 +107,13 @@ const SignUp = () => {
               value={formData.phone}
               onChange={handleInputChange}
               placeholder="Enter your phone number"
-              className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
             <div className="relative">
@@ -124,7 +123,7 @@ const SignUp = () => {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Create a password"
-                className="w-full px-3 py-2 pr-10 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
               <button
@@ -133,16 +132,16 @@ const SignUp = () => {
                 className="absolute inset-y-0 right-0 pr-3 flex items-center"
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-300" />
+                  <EyeOff className="h-4 w-4 text-gray-600" />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-300" />
+                  <Eye className="h-4 w-4 text-gray-600" />
                 )}
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Confirm Password
             </label>
             <div className="relative">
@@ -152,7 +151,7 @@ const SignUp = () => {
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 placeholder="Confirm your password"
-                className="w-full px-3 py-2 pr-10 bg-slate-700/50 border border-slate-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
               <button
@@ -161,9 +160,9 @@ const SignUp = () => {
                 className="absolute inset-y-0 right-0 pr-3 flex items-center"
               >
                 {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-300" />
+                  <EyeOff className="h-4 w-4 text-gray-600" />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-300" />
+                  <Eye className="h-4 w-4 text-gray-600" />
                 )}
               </button>
             </div>
@@ -176,25 +175,25 @@ const SignUp = () => {
             Create Account
           </button>
 
-          <div className="text-center text-gray-400 text-sm">OR</div>
+          <div className="text-center text-gray-600 text-sm">OR</div>
 
           <button
             type="button"
             onClick={() => navigate('/login')}
-            className="w-full border border-blue-500 text-blue-400 py-2 px-4 rounded-md hover:bg-blue-500/10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium transition-all duration-300"
+            className="w-full border border-blue-500 text-blue-600 py-2 px-4 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium transition-all duration-300"
           >
             Already have an account? Login
           </button>
 
           <button
             type="button"
-            className="w-full border border-cyan-500 text-cyan-400 py-2 px-4 rounded-md hover:bg-cyan-500/10 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 font-medium transition-all duration-300"
+            className="w-full border border-cyan-500 text-cyan-600 py-2 px-4 rounded-md hover:bg-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 font-medium transition-all duration-300"
           >
             Sign Up with OTP
           </button>
         </form>
 
-        <p className="text-xs text-gray-400 text-center mt-4">
+        <p className="text-xs text-gray-600 text-center mt-4">
           By creating an account, you agree to our Terms of Service and Privacy Policy
         </p>
       </div>
