@@ -1,3 +1,5 @@
+import tokenManager from '../utils/sessionManager';
+
 const API_BASE_URL = 'http://localhost:5000/api';
 
 const api = {
@@ -38,9 +40,21 @@ const api = {
     }
   },
 
+  logout: async () => {
+    const token = tokenManager.getToken();
+    if (token) {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+    }
+    tokenManager.clearToken();
+  },
+
   // Complaint endpoints
   createComplaint: async (complaintData) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     const response = await fetch(`${API_BASE_URL}/complaints`, {
       method: 'POST',
       headers: {
@@ -53,7 +67,7 @@ const api = {
   },
 
   getComplaints: async () => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     const response = await fetch(`${API_BASE_URL}/complaints`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -61,7 +75,7 @@ const api = {
   },
 
   getComplaint: async (id) => {
-    const token = localStorage.getItem('token');
+    const token = tokenManager.getToken();
     const response = await fetch(`${API_BASE_URL}/complaints/${id}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });

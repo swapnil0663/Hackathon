@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { User, Mail, Phone, Edit, Save, X } from 'lucide-react';
 import Layout from '../../components/Layout';
+import tokenManager from '../../utils/sessionManager';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -12,14 +13,13 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = tokenManager.getUser();
     if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
+      setUser(userData);
       setFormData({
-        fullName: parsedUser.fullName || '',
-        email: parsedUser.email || '',
-        phone: parsedUser.phone || ''
+        fullName: userData.fullName || '',
+        email: userData.email || '',
+        phone: userData.phone || ''
       });
     }
   }, []);
@@ -33,7 +33,7 @@ const Profile = () => {
 
   const handleSave = () => {
     const updatedUser = { ...user, ...formData };
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    tokenManager.updateUser(updatedUser);
     setUser(updatedUser);
     setIsEditing(false);
   };

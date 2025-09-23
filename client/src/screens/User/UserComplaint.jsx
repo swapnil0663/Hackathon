@@ -2,15 +2,16 @@ import { FileText, Search, Clock, Bell } from 'lucide-react';
 import Layout from '../../components/Layout';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import tokenManager from '../../utils/sessionManager';
 
 const UserComplaint = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = tokenManager.getUser();
     if (userData) {
-      setUser(JSON.parse(userData));
+      setUser(userData);
     }
   }, []);
   const notifications = [

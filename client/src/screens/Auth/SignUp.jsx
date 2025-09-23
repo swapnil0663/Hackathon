@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import AuthNavbar from '../../components/AuthNavbar';
 import api from '../../services/api';
+import tokenManager from '../../utils/sessionManager';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -39,8 +40,7 @@ const SignUp = () => {
       });
       console.log('Registration result:', result);
       if (result.token) {
-        localStorage.setItem('token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
+        tokenManager.setToken(result.token, result.user);
         navigate('/user-dashboard');
       } else {
         alert(result.message || 'Registration failed');

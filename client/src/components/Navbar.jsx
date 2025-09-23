@@ -1,19 +1,19 @@
 import { User, LogOut, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import sessionManager from '../utils/sessionManager';
+import api from '../services/api';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
+    setIsLoggedIn(sessionManager.isAuthenticated());
   }, []);
   
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const handleLogout = async () => {
+    await api.logout();
     setIsLoggedIn(false);
     navigate('/');
   };

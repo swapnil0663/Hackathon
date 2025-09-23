@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthNavbar from '../../components/AuthNavbar';
 import api from '../../services/api';
+import tokenManager from '../../utils/sessionManager';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,8 +21,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.emailOrPhone === 'user' && formData.password === 'user@123') {
-      localStorage.setItem('token', 'dummy-token');
-      localStorage.setItem('user', JSON.stringify({ fullName: 'Alex Johnson', email: 'user@example.com' }));
+      tokenManager.setToken('dummy-token', { fullName: 'Alex Johnson', email: 'user@example.com' });
       navigate('/user-dashboard');
       return;
     }
@@ -30,8 +30,7 @@ const Login = () => {
       const result = await api.login(formData.emailOrPhone, formData.password);
       console.log('Login result:', result);
       if (result.token) {
-        localStorage.setItem('token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
+        tokenManager.setToken(result.token, result.user);
         navigate('/user-dashboard');
       } else {
         alert(result.message || 'Login failed');
