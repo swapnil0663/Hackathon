@@ -80,6 +80,63 @@ const api = {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     return response.json();
+  },
+
+  getDashboardStats: async () => {
+    const token = tokenManager.getToken();
+    const response = await fetch(`${API_BASE_URL}/complaints/dashboard/stats`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+  },
+
+  getAllComplaints: async () => {
+    const token = tokenManager.getToken();
+    const response = await fetch(`${API_BASE_URL}/complaints/admin/all`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch complaints');
+    }
+    return data;
+  },
+
+  createAdmin: async () => {
+    const response = await fetch(`${API_BASE_URL}/auth/create-admin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.json();
+  },
+
+  getAllUsers: async () => {
+    const token = tokenManager.getToken();
+    const response = await fetch(`${API_BASE_URL}/complaints/admin/users`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch users');
+    }
+    return data;
+  },
+
+  updateComplaintStatus: async (id, status) => {
+    const token = tokenManager.getToken();
+    const response = await fetch(`${API_BASE_URL}/complaints/admin/${id}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ status })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to update status');
+    }
+    return data;
   }
 };
 

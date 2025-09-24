@@ -33,7 +33,7 @@ const AdminNavbar = () => {
 
   const handleLogout = () => {
     tokenManager.clearToken();
-    navigate('/login');
+    navigate('/');
   };
 
   const unreadCount = notifications.length;

@@ -172,6 +172,44 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Create admin user (temporary route for testing)
+router.post('/create-admin', async (req, res) => {
+  try {
+    const adminEmail = 'admin';
+    const adminPassword = 'admin@123';
+    
+    // Check if admin already exists
+    const existingAdmin = await pool.query('SELECT * FROM users WHERE email = $1', [adminEmail]);
+    if (existingAdmin.rows.length > 0) {
+      return res.status(400).json({ message: 'Admin user already exists' });
+    }
+    
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(adminPassword, salt);
+    
+    // Generate unique user ID
+    const userId = await generateUserId();
+    
+    const newAdmin = await pool.query(
+      'INSERT INTO users (user_id, full_name, email, phone, password, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [userId, 'Admin User', adminEmail, '1234567890', hashedPassword, 'admin']
+    );
+    
+    res.status(201).json({
+      message: 'Admin user created successfully',
+      user: {
+        email: adminEmail,
+        password: adminPassword,
+        role: 'admin'
+      }
+    });
+  } catch (error) {
+    console.error('❌ Admin creation error:', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // Logout
 router.post('/logout', async (req, res) => {
   try {
