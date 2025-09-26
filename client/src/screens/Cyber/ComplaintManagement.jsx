@@ -405,18 +405,27 @@ const ComplaintManagement = () => {
                           <Volume2 className="w-4 h-4" />
                           Voice Note
                         </h4>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => playAudio(selectedComplaint.voice_note, selectedComplaint.id)}
-                          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 rounded-xl font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
-                        >
-                          {playingAudio === selectedComplaint.id ? (
-                            <><Pause className="w-5 h-5" /> Pause Audio</>
-                          ) : (
-                            <><Play className="w-5 h-5" /> Play Audio</>
-                          )}
-                        </motion.button>
+                        <div className="space-y-3">
+                          <audio 
+                            controls 
+                            className="w-full"
+                            src={`http://localhost:5000/uploads/${selectedComplaint.voice_note}`}
+                          >
+                            Your browser does not support the audio element.
+                          </audio>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => playAudio(selectedComplaint.voice_note, selectedComplaint.id)}
+                            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                          >
+                            {playingAudio === selectedComplaint.id ? (
+                              <><Pause className="w-4 h-4" /> Stop</>
+                            ) : (
+                              <><Play className="w-4 h-4" /> Play</>
+                            )}
+                          </motion.button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -457,6 +466,12 @@ const ComplaintManagement = () => {
                         </div>
                       </div>
                       
+                      {/* Debug Info - Remove in production */}
+                      <div className="mb-6 p-3 bg-yellow-50 rounded-xl text-xs">
+                        <p><strong>Evidence Files:</strong> {selectedComplaint.evidence_files || 'None'}</p>
+                        <p><strong>Voice Note:</strong> {selectedComplaint.voice_note || 'None'}</p>
+                      </div>
+                      
                       {/* Evidence Files */}
                       {selectedComplaint.evidence_files && (
                         <div>
@@ -464,21 +479,50 @@ const ComplaintManagement = () => {
                             <ImageIcon className="w-4 h-4" />
                             Evidence Files
                           </label>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            {selectedComplaint.evidence_files.split(',').map((file, index) => (
-                              <div key={index} className="bg-gray-100 rounded-xl p-3 text-center">
-                                <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                                <p className="text-xs text-gray-600 truncate">{file.trim()}</p>
-                                <a 
-                                  href={`http://localhost:5000/uploads/${file.trim()}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-blue-600 hover:underline"
-                                >
-                                  View
-                                </a>
-                              </div>
-                            ))}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {selectedComplaint.evidence_files.split(',').map((file, index) => {
+                              const fileName = file.trim();
+                              const fileUrl = `http://localhost:5000/uploads/${fileName}`;
+                              const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+                              
+                              return (
+                                <div key={index} className="bg-gray-50 rounded-xl overflow-hidden">
+                                  {isImage ? (
+                                    <div>
+                                      <img 
+                                        src={fileUrl}
+                                        alt={`Evidence ${index + 1}`}
+                                        className="w-full h-48 object-cover"
+                                      />
+                                      <div className="p-3">
+                                        <p className="text-sm text-gray-600 truncate">{fileName}</p>
+                                        <a 
+                                          href={fileUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-sm text-blue-600 hover:underline"
+                                        >
+                                          View Full Size
+                                        </a>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="p-4 text-center">
+                                      <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                                      <p className="text-sm text-gray-600 truncate">{fileName}</p>
+                                      <a 
+                                        href={fileUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-sm text-blue-600 hover:underline"
+                                      >
+                                        Download File
+                                      </a>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}

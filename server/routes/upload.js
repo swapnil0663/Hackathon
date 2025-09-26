@@ -114,4 +114,32 @@ router.post('/evidence', upload.single('evidence'), async (req, res) => {
   }
 });
 
+// Save complaint attachments
+router.post('/complaint-attachments', auth, async (req, res) => {
+  try {
+    const { complaintId, files } = req.body;
+    
+    if (!files || files.length === 0) {
+      return res.status(400).json({ message: 'No files provided' });
+    }
+    
+    const attachments = [];
+    for (const file of files) {
+      const result = await pool.query(
+        'INSERT INTO complaint_attachments (complaint_id, file_name, file_path, file_type) VALUES ($1, $2, $3, $4) RETURNING *',
+        [complaintId, file.originalName, file.filename, file.mimetype]
+      );
+      attachments.push(result.rows[0]);
+    }
+    
+    res.json({
+      message: 'Attachments saved successfully',
+      attachments
+    });
+  } catch (error) {
+    console.error('Error saving attachments:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;

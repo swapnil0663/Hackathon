@@ -128,7 +128,26 @@ const MessagingModal = ({ isOpen, onClose, recipientId, recipientName, targetUse
                           : 'bg-gray-100 text-gray-900'
                       }`}
                     >
-                      <p className="text-sm">{message.message}</p>
+                      {/* Check if message contains image */}
+                      {message.message.includes('http://localhost:5000/uploads/') && message.message.match(/\.(jpg|jpeg|png|gif)$/i) ? (
+                        <div>
+                          <img 
+                            src={message.message} 
+                            alt="Shared image" 
+                            className="max-w-full h-auto rounded-lg mb-2"
+                            style={{ maxHeight: '200px' }}
+                          />
+                        </div>
+                      ) : message.message.includes('http://localhost:5000/uploads/') && message.message.match(/\.(mp3|wav|ogg|m4a)$/i) ? (
+                        <div>
+                          <audio controls className="mb-2">
+                            <source src={message.message} type="audio/mpeg" />
+                            Your browser does not support the audio element.
+                          </audio>
+                        </div>
+                      ) : (
+                        <p className="text-sm">{message.message}</p>
+                      )}
                       <p className={`text-xs mt-1 ${
                         senderId === currentUser.id ? 'text-blue-100' : 'text-gray-500'
                       }`}>

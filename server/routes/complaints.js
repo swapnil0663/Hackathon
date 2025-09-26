@@ -14,8 +14,8 @@ const generateComplaintId = async () => {
 // Create complaint
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, description, category, location, priority } = req.body;
-    console.log('📝 Creating complaint with data:', { title, description, category, location, priority });
+    const { title, description, category, location, priority, evidence } = req.body;
+    console.log('📝 Creating complaint with data:', { title, description, category, location, priority, evidence });
     console.log('👤 User from auth:', req.user);
     
     const userId = req.user.id;
@@ -26,6 +26,27 @@ router.post('/', auth, async (req, res) => {
       'INSERT INTO complaints (user_id, complaint_id, title, description, category, location, priority, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
       [userId, complaintId, title, description, category, location, priority || 'medium', 'pending']
     );
+
+    const complaintDbId = newComplaint.rows[0].id;
+
+    // Save evidence files to complaint_attachments table
+    if (evidence && evidence.length > 0) {
+      for (const filename of evidence) {
+        // Determine file type based on filename
+        let fileType = 'application/octet-stream';
+        if (filename.includes('evidence-') && /\.(jpg|jpeg|png|gif)$/i.test(filename)) {
+          fileType = 'image/jpeg';
+        } else if (filename.includes('voice-note') || /\.(wav|mp3|ogg)$/i.test(filename)) {
+          fileType = 'audio/wav';
+        }
+        
+        await pool.query(
+          'INSERT INTO complaint_attachments (complaint_id, file_name, file_path, file_type) VALUES ($1, $2, $3, $4)',
+          [complaintDbId, filename, filename, fileType]
+        );
+      }
+      console.log(`📎 Saved ${evidence.length} attachments for complaint ${complaintDbId}`);
+    }
 
     // Get user name for notification
     const userResult = await pool.query('SELECT full_name FROM users WHERE id = $1', [userId]);
@@ -100,10 +121,17 @@ router.get('/admin/all', adminAuth, async (req, res) => {
         c.status,
         c.created_at,
         c.updated_at,
+        c.user_id,
         u.full_name as user_name,
-        u.email as user_email
+        u.email as user_email,
+        ui.image_path as user_image,
+        STRING_AGG(CASE WHEN ca.file_type LIKE 'image%' THEN ca.file_path END, ',') as evidence_files,
+        STRING_AGG(CASE WHEN ca.file_type LIKE 'audio%' THEN ca.file_path END, ',') as voice_note
       FROM complaints c
       JOIN users u ON c.user_id = u.id
+      LEFT JOIN user_images ui ON u.id = ui.user_id
+      LEFT JOIN complaint_attachments ca ON c.id = ca.complaint_id
+      GROUP BY c.id, c.complaint_id, c.title, c.description, c.category, c.location, c.priority, c.status, c.created_at, c.updated_at, c.user_id, u.full_name, u.email, ui.image_path
       ORDER BY c.created_at DESC
     `);
 
