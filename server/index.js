@@ -8,6 +8,7 @@ const { initializeSocket } = require('./socket');
 const authRoutes = require('./routes/auth');
 const complaintRoutes = require('./routes/complaints');
 const uploadRoutes = require('./routes/upload');
+const messageRoutes = require('./routes/messages');
 
 const app = express();
 const server = http.createServer(app);
@@ -37,6 +38,7 @@ pool.connect((err, client, release) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));

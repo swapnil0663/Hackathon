@@ -13,11 +13,15 @@ import Profile from './screens/User/Profile';
 import AdminLayout from './screens/Cyber/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Toast from './components/Toast';
+import { MessagingProvider } from './components/GlobalMessaging';
+import { NotificationProvider } from './components/GlobalNotifications';
 
 function App() {
   return (
-    <Router>
-      <Toast />
+    <NotificationProvider>
+      <MessagingProvider>
+        <Router>
+        <Toast />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
@@ -59,7 +63,9 @@ function App() {
           </ProtectedRoute>
         } />
       </Routes>
-    </Router>
+        </Router>
+      </MessagingProvider>
+    </NotificationProvider>
   );
 }
 

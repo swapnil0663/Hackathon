@@ -110,7 +110,23 @@ const api = {
     if (!response.ok) {
       throw new Error(data.message || 'Failed to fetch complaints');
     }
-    return data;
+    
+    // Fetch user images for each complaint
+    const complaintsWithImages = await Promise.all(
+      data.map(async (complaint) => {
+        try {
+          if (complaint.user_id) {
+            const userImage = await api.getUserImage(complaint.user_id);
+            return { ...complaint, user_image: userImage?.image_path };
+          }
+          return complaint;
+        } catch (error) {
+          return complaint;
+        }
+      })
+    );
+    
+    return complaintsWithImages;
   },
 
   createAdmin: async () => {

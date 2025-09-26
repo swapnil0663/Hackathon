@@ -1,8 +1,10 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
+const pool = require('./config/database');
 
 let io;
 const userSockets = new Map(); // userId -> socketId
+const messages = new Map(); // roomId -> messages array
 
 const initializeSocket = (server) => {
   io = new Server(server, {
@@ -54,6 +56,61 @@ const initializeSocket = (server) => {
         console.log('🧪 Test notification sent to user');
       }
     }, 2000);
+
+    // Handle messaging
+    socket.on('joinRoom', async ({ recipientId }) => {
+      const userId = socket.userId; // Use authenticated user ID
+      let roomId = 'support-general'; // Single room for all support communication
+      
+      socket.join(roomId);
+      console.log(`🔍 DEBUG: User ${userId} (${socket.userRole}) joined room ${roomId}`);
+      
+      // Send message history from database
+      try {
+        const result = await pool.query(
+          'SELECT * FROM messages WHERE room_id = $1 ORDER BY timestamp ASC',
+          [roomId]
+        );
+        console.log(`🔍 DEBUG: Found ${result.rows.length} messages for room ${roomId}`);
+        socket.emit('messageHistory', result.rows);
+      } catch (error) {
+        console.error('Error fetching message history:', error);
+        socket.emit('messageHistory', []);
+      }
+    });
+
+    socket.on('sendMessage', async (messageData) => {
+      const senderId = socket.userId; // Use authenticated user ID
+      const { recipientId, message, timestamp, senderName } = messageData;
+      const roomId = 'support-general'; // Single room for all support communication
+      
+      const messageObj = {
+        sender_id: parseInt(senderId),
+        recipient_id: recipientId,
+        message,
+        timestamp,
+        room_id: roomId,
+        sender_name: senderName || 'Unknown'
+      };
+      
+      console.log(`🔍 DEBUG: Saving message from user ${senderId} (${socket.userRole}) to room ${roomId}`);
+      
+      try {
+        // Save to database
+        const result = await pool.query(
+          'INSERT INTO messages (sender_id, recipient_id, message, room_id, sender_name) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+          [messageObj.sender_id, messageObj.recipient_id, messageObj.message, messageObj.room_id, messageObj.sender_name]
+        );
+        
+        const savedMessage = result.rows[0];
+        
+        // Send to the room
+        io.to(roomId).emit('newMessage', savedMessage);
+        console.log(`💬 DEBUG: Message saved and sent in room ${roomId} by ${senderName}: ${message}`);
+      } catch (error) {
+        console.error('Error saving message:', error);
+      }
+    });
 
     socket.on('disconnect', () => {
       console.log(`👋 User ${socket.userId} disconnected`);

@@ -1,19 +1,20 @@
-import { User, LogOut, LogIn, Bell, Search, Shield, LayoutDashboard, X } from 'lucide-react';
+import { User, LogOut, LogIn, Bell, Search, Shield, LayoutDashboard, X, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import sessionManager from '../utils/sessionManager';
-import notificationService from '../services/notificationService';
 import api from '../services/api';
+import { useMessaging } from './GlobalMessaging';
+import { useNotifications } from './GlobalNotifications';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [notifications, setNotifications] = useState([]);
   const [userImage, setUserImage] = useState(null);
   const [user, setUser] = useState(null);
+  const { openMessaging } = useMessaging();
+  const { openNotifications, getUnreadCount } = useNotifications();
   
   useEffect(() => {
     const authenticated = sessionManager.isAuthenticated();
@@ -26,15 +27,6 @@ const Navbar = () => {
       if (userData?.id) {
         fetchUserImage(userData.id);
       }
-      
-      notificationService.connect();
-      const unsubscribe = notificationService.subscribe(setNotifications);
-      setNotifications(notificationService.getNotifications());
-
-      return () => {
-        unsubscribe();
-        notificationService.disconnect();
-      };
     }
   }, []);
   
@@ -51,7 +43,6 @@ const Navbar = () => {
   
   const handleLogout = async () => {
     await api.logout();
-    notificationService.disconnect();
     setIsLoggedIn(false);
     navigate('/');
   };
@@ -60,15 +51,7 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const unreadCount = notificationService.getUnreadCount();
 
-  const handleNotificationClick = (notification) => {
-    notificationService.markAsRead(notification.id);
-  };
-
-  const handleMarkAllRead = () => {
-    notificationService.markAllAsRead();
-  };
   
   
   return (
@@ -114,95 +97,32 @@ const Navbar = () => {
                 className="relative"
               >
                 <button
-                  onClick={() => setShowNotifications(!showNotifications)}
+                  onClick={openNotifications}
                   className="relative p-3 rounded-xl hover:bg-blue-50 text-blue-600 transition-colors group"
                 >
                   <Bell size={20} className="group-hover:text-blue-700" />
-                  {unreadCount > 0 && (
+                  {getUnreadCount() > 0 && (
                     <motion.span 
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-medium shadow-lg"
                     >
-                      {unreadCount > 9 ? '9+' : unreadCount}
+                      {getUnreadCount() > 9 ? '9+' : getUnreadCount()}
                     </motion.span>
                   )}
                 </button>
 
-                {showNotifications && (
-                  <div 
-                    className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4"
-                    onClick={() => setShowNotifications(false)}
-                  >
-                    <div 
-                      className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col mx-auto"
-                      onClick={(e) => e.stopPropagation()}
-                      style={{ position: 'relative', top: '0', left: '0', transform: 'none' }}
-                    >
-                      <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-2xl">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="text-xl font-bold">Notifications</h3>
-                            <p className="text-sm opacity-90">{unreadCount} unread messages</p>
-                          </div>
-                          <button
-                            onClick={() => setShowNotifications(false)}
-                            className="p-2 hover:bg-white/20 rounded-lg"
-                          >
-                            <X size={24} />
-                          </button>
-                        </div>
-                        {unreadCount > 0 && (
-                          <button
-                            onClick={handleMarkAllRead}
-                            className="mt-3 text-sm bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full"
-                          >
-                            Mark all as read
-                          </button>
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 overflow-y-auto p-4">
-                        {notifications.length > 0 ? (
-                          <div className="space-y-3">
-                            {notifications.map((notification) => (
-                              <div 
-                                key={notification.id}
-                                onClick={() => handleNotificationClick(notification)}
-                                className={`p-4 rounded-xl cursor-pointer border-2 ${
-                                  !notification.read 
-                                    ? 'bg-blue-50 border-blue-200 hover:bg-blue-100' 
-                                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                                }`}
-                              >
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <p className={`text-base leading-relaxed ${
-                                      !notification.read ? 'font-semibold text-gray-900' : 'text-gray-700'
-                                    }`}>
-                                      {notification.message}
-                                    </p>
-                                    <p className="text-sm text-gray-500 mt-2">{notification.time}</p>
-                                  </div>
-                                  {!notification.read && (
-                                    <div className="w-3 h-3 bg-blue-500 rounded-full ml-3 mt-1" />
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center h-64 text-center">
-                            <Bell className="w-20 h-20 text-gray-300 " />
-                            <h4 className="text-xl font-medium text-gray-600 mb-2">No notifications</h4>
-                            <p className="text-gray-500">You're all caught up! New notifications will appear here.</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
+
               </motion.div>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => openMessaging()}
+                className="p-3 rounded-xl hover:bg-blue-50 text-blue-600 transition-colors group"
+              >
+                <MessageCircle size={20} className="group-hover:text-blue-700" />
+              </motion.button>
 
               <motion.div 
                 className="relative"
