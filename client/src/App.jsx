@@ -6,7 +6,7 @@ import SignUp from './screens/Auth/SignUp';
 import Demo from './screens/Demo/Demo';
 import UserComplaint from './screens/User/UserComplaint';
 import RegisterComplaint from './screens/User/RegisterComplaint';
-import TrackComplaint from './screens/User/TrackComplaint';
+
 import User from './screens/User/User';
 import ComplaintHistory from './screens/User/ComplaintHistory';
 import Profile from './screens/User/Profile';
@@ -42,11 +42,7 @@ function App() {
             <RegisterComplaint />
           </ProtectedRoute>
         } />
-        <Route path="/track-complaint" element={
-          <ProtectedRoute requiredRole="user">
-            <TrackComplaint />
-          </ProtectedRoute>
-        } />
+
         <Route path="/user/complaints" element={
           <ProtectedRoute requiredRole="user">
             <User />

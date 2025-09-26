@@ -159,11 +159,6 @@ const SignUp = () => {
               <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
             </div>
           )}
-          <div className="flex items-center justify-center mb-4">
-            <div className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 text-2xl font-bold">
-              ✱ CyberGuard
-            </div>
-          </div>
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Complete Registration</h1>
           <p className="text-gray-600 text-sm">Fill in your details to create your account</p>
         </div>

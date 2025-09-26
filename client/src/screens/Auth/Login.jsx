@@ -61,16 +61,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center p-4 pt-32">
       <AuthNavbar />
       <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-8 w-full max-w-md">
         {/* Logo and Title */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 text-2xl font-bold">
-              ✱ ComplainTrack  
-            </div>
-          </div>
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome </h1>
         </div>
 

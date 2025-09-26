@@ -40,7 +40,7 @@ const MessagingModal = ({ isOpen, onClose, recipientId, recipientName, targetUse
         socketConnection.disconnect();
       };
     }
-  }, [isOpen, recipientId, currentUser.id, targetUserId]);
+  }, [isOpen, recipientId, currentUser?.id, targetUserId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -57,7 +57,7 @@ const MessagingModal = ({ isOpen, onClose, recipientId, recipientName, targetUse
         recipientId: targetRecipient,
         message: newMessage.trim(),
         timestamp: new Date().toISOString(),
-        senderName: currentUser.fullName
+        senderName: currentUser?.fullName || 'Unknown User'
       };
 
       console.log('📤 DEBUG: Sending message:', messageData);
@@ -119,11 +119,11 @@ const MessagingModal = ({ isOpen, onClose, recipientId, recipientName, targetUse
                 return (
                   <div
                     key={message.id || index}
-                    className={`flex ${senderId === currentUser.id ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${senderId === currentUser?.id ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
                       className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-                        senderId === currentUser.id
+                        senderId === currentUser?.id
                           ? 'bg-blue-600 text-white'
                           : 'bg-gray-100 text-gray-900'
                       }`}
@@ -149,7 +149,7 @@ const MessagingModal = ({ isOpen, onClose, recipientId, recipientName, targetUse
                         <p className="text-sm">{message.message}</p>
                       )}
                       <p className={`text-xs mt-1 ${
-                        senderId === currentUser.id ? 'text-blue-100' : 'text-gray-500'
+                        senderId === currentUser?.id ? 'text-blue-100' : 'text-gray-500'
                       }`}>
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </p>

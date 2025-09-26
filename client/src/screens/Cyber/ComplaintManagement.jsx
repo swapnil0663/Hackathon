@@ -25,6 +25,7 @@ const ComplaintManagement = () => {
     try {
       setLoading(true);
       const data = await api.getAllComplaints();
+
       setComplaints(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching complaints:', error);
@@ -260,7 +261,7 @@ const ComplaintManagement = () => {
                 <div className="flex items-center gap-3 mb-3">
                   {complaint.user_image ? (
                     <img 
-                      src={`http://localhost:5000/uploads/${complaint.user_image}`}
+                      src={`http://localhost:5000/${complaint.user_image.replace(/\\/g, '/')}`}
                       alt={complaint.user_name}
                       className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md"
                     />
@@ -353,7 +354,7 @@ const ComplaintManagement = () => {
                       <div className="text-center mb-4">
                         {selectedComplaint.user_image ? (
                           <img 
-                            src={`http://localhost:5000/uploads/${selectedComplaint.user_image}`}
+                            src={`http://localhost:5000/${selectedComplaint.user_image.replace(/\\/g, '/')}`}
                             alt={selectedComplaint.user_name}
                             className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mx-auto mb-4"
                           />
@@ -466,11 +467,7 @@ const ComplaintManagement = () => {
                         </div>
                       </div>
                       
-                      {/* Debug Info - Remove in production */}
-                      <div className="mb-6 p-3 bg-yellow-50 rounded-xl text-xs">
-                        <p><strong>Evidence Files:</strong> {selectedComplaint.evidence_files || 'None'}</p>
-                        <p><strong>Voice Note:</strong> {selectedComplaint.voice_note || 'None'}</p>
-                      </div>
+
                       
                       {/* Evidence Files */}
                       {selectedComplaint.evidence_files && (

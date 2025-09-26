@@ -32,12 +32,18 @@ router.post('/', auth, async (req, res) => {
     // Save evidence files to complaint_attachments table
     if (evidence && evidence.length > 0) {
       for (const filename of evidence) {
-        // Determine file type based on filename
+        // Determine file type based on filename extension
         let fileType = 'application/octet-stream';
-        if (filename.includes('evidence-') && /\.(jpg|jpeg|png|gif)$/i.test(filename)) {
+        if (/\.(jpg|jpeg)$/i.test(filename)) {
           fileType = 'image/jpeg';
-        } else if (filename.includes('voice-note') || /\.(wav|mp3|ogg)$/i.test(filename)) {
+        } else if (/\.png$/i.test(filename)) {
+          fileType = 'image/png';
+        } else if (/\.gif$/i.test(filename)) {
+          fileType = 'image/gif';
+        } else if (/\.(wav|mp3|ogg|m4a)$/i.test(filename)) {
           fileType = 'audio/wav';
+        } else if (/\.pdf$/i.test(filename)) {
+          fileType = 'application/pdf';
         }
         
         await pool.query(

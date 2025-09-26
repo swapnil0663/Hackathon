@@ -9,7 +9,7 @@ const UserSidebar = () => {
   const menuItems = [
     { icon: Plus, label: 'New Complaint', path: '/register-complaint', color: 'text-teal-500' },
     { icon: FileText, label: 'My Complaints', path: '/user-dashboard', color: 'text-indigo-500' },
-    { icon: Clock, label: 'Track Status', path: '/track-complaint', color: 'text-orange-500' },
+    { icon: Clock, label: 'Track Status', path: '/user/complaints', color: 'text-orange-500' },
     { icon: CheckCircle, label: 'Resolved', path: '/complaint-history', color: 'text-emerald-500' },
     // { icon: AlertCircle, label: 'Urgent', path: '/urgent-complaints', color: 'text-rose-500' },
   ];

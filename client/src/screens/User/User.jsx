@@ -98,10 +98,7 @@ const User = () => {
         baseTimeline[2].active = true;
         break;
       case 'resolved':
-        baseTimeline.forEach((step, index) => {
-          if (index < 4) step.completed = true;
-        });
-        baseTimeline[4].active = true;
+        baseTimeline.forEach(step => step.completed = true);
         break;
       case 'closed':
         baseTimeline.forEach(step => step.completed = true);
@@ -296,9 +293,9 @@ const User = () => {
                       <p className="text-gray-600 text-xs mb-3">
                         If you have questions about your complaint progress, contact support.
                       </p>
-                      <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs transition-colors">
+                      <a href="mailto:cyberpolice@sangli.com" className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs transition-colors inline-block text-center">
                         Contact Support
-                      </button>
+                      </a>
                     </div>
                   </div>
                 </div>

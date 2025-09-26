@@ -37,25 +37,7 @@ const initializeSocket = (server) => {
     userSockets.set(socket.userId, socket.id);
     userSockets.set(parseInt(socket.userId), socket.id);
 
-    // Send a test notification to verify connection
-    setTimeout(() => {
-      if (socket.userRole === 'admin') {
-        socket.emit('newComplaint', {
-          complaintId: 'TEST001',
-          userName: 'Test User',
-          title: 'Test Notification',
-          category: 'Test'
-        });
-        console.log('🧪 Test notification sent to admin');
-      } else {
-        socket.emit('statusUpdate', {
-          complaintId: 'TEST001',
-          status: 'pending',
-          title: 'Test Status Update'
-        });
-        console.log('🧪 Test notification sent to user');
-      }
-    }, 2000);
+
 
     // Handle messaging
     socket.on('joinRoom', async ({ recipientId }) => {

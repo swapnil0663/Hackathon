@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/AdminSidebar';
 import AdminNavbar from '../../components/AdminNavbar';
 import Dashboard from './Dashboard';
 import ComplaintManagement from './ComplaintManagement';
 import OfficerProfile from './OfficerProfile';
+import notificationService from '../../services/notificationService';
 
 const AdminLayout = () => {
   const [activeItem, setActiveItem] = useState('Dashboard');
+
+  useEffect(() => {
+    notificationService.connect();
+    return () => {
+      notificationService.disconnect();
+    };
+  }, []);
 
   const renderContent = () => {
     switch (activeItem) {

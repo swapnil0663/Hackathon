@@ -62,7 +62,7 @@ const UserComplaint = () => {
               <h3 className="text-xl font-bold text-gray-800 mb-3">Track Complaint Status</h3>
               <p className="text-gray-600 text-sm mb-6 leading-relaxed">Monitor real-time progress and updates of your submitted complaints.</p>
               <button 
-                onClick={() => navigate('/track-complaint')}
+                onClick={() => navigate('/user/complaints')}
                 className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-3 rounded-xl font-semibold transition-all duration-200 shadow-md"
               >
                 Track Status
