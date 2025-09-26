@@ -7,9 +7,7 @@ const Layout = ({ userType = 'user', children }) => {
   
   return (
     <BaseLayout showSidebar={true} sidebarComponent={sidebarComponent}>
-      <div className="p-6">
-        {children}
-      </div>
+      {children}
     </BaseLayout>
   );
 };

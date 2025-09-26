@@ -1,24 +1,77 @@
 const express = require('express');
 const pool = require('../config/database');
-const auth = require('../middleware/auth');
+const { auth, adminAuth } = require('../middleware/auth');
+const { emitNewComplaint, emitStatusUpdate } = require('../socket');
 const router = express.Router();
+
+// Generate complaint ID
+const generateComplaintId = async () => {
+  const result = await pool.query('SELECT MAX(id) as max_id FROM complaints');
+  const nextId = (result.rows[0]?.max_id || 0) + 1;
+  return `CMP${String(nextId).padStart(6, '0')}`;
+};
 
 // Create complaint
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, description, category, priority } = req.body;
-    const userId = req.user.userId;
+    const { title, description, category, location, priority, evidence } = req.body;
+    console.log('📝 Creating complaint with data:', { title, description, category, location, priority, evidence });
+    console.log('👤 User from auth:', req.user);
+    
+    const userId = req.user.id;
+    const complaintId = await generateComplaintId();
+    console.log('🆔 Generated complaint ID:', complaintId);
 
     const newComplaint = await pool.query(
-      'INSERT INTO complaints (user_id, title, description, category, priority, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [userId, title, description, category, priority || 'medium', 'pending']
+      'INSERT INTO complaints (user_id, complaint_id, title, description, category, location, priority, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+      [userId, complaintId, title, description, category, location, priority || 'medium', 'pending']
     );
 
+    const complaintDbId = newComplaint.rows[0].id;
+
+    // Save evidence files to complaint_attachments table
+    if (evidence && evidence.length > 0) {
+      for (const filename of evidence) {
+        // Determine file type based on filename extension
+        let fileType = 'application/octet-stream';
+        if (/\.(jpg|jpeg)$/i.test(filename)) {
+          fileType = 'image/jpeg';
+        } else if (/\.png$/i.test(filename)) {
+          fileType = 'image/png';
+        } else if (/\.gif$/i.test(filename)) {
+          fileType = 'image/gif';
+        } else if (/\.(wav|mp3|ogg|m4a)$/i.test(filename)) {
+          fileType = 'audio/wav';
+        } else if (/\.pdf$/i.test(filename)) {
+          fileType = 'application/pdf';
+        }
+        
+        await pool.query(
+          'INSERT INTO complaint_attachments (complaint_id, file_name, file_path, file_type) VALUES ($1, $2, $3, $4)',
+          [complaintDbId, filename, filename, fileType]
+        );
+      }
+      console.log(`📎 Saved ${evidence.length} attachments for complaint ${complaintDbId}`);
+    }
+
+    // Get user name for notification
+    const userResult = await pool.query('SELECT full_name FROM users WHERE id = $1', [userId]);
+    const userName = userResult.rows[0]?.full_name || 'Unknown User';
+    console.log('📝 User name for notification:', userName);
+
+    // Emit notification to admins
+    console.log('🚀 About to emit new complaint notification');
+    emitNewComplaint(newComplaint.rows[0], userName);
+    console.log('📫 Notification emission completed');
+
+    console.log('✅ Complaint created:', newComplaint.rows[0]);
     res.status(201).json({
       message: 'Complaint created successfully',
       complaint: newComplaint.rows[0]
     });
   } catch (error) {
+    console.error('❌ Complaint creation error:', error.message);
+    console.error('❌ Stack trace:', error.stack);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -26,7 +79,7 @@ router.post('/', auth, async (req, res) => {
 // Get user complaints
 router.get('/', auth, async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id; // Use id instead of userId
     const complaints = await pool.query(
       'SELECT * FROM complaints WHERE user_id = $1 ORDER BY created_at DESC',
       [userId]
@@ -42,7 +95,7 @@ router.get('/', auth, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user.id; // Use id instead of userId
 
     const complaint = await pool.query(
       'SELECT * FROM complaints WHERE id = $1 AND user_id = $2',
@@ -55,6 +108,141 @@ router.get('/:id', auth, async (req, res) => {
 
     res.json(complaint.rows[0]);
   } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Get all complaints (admin)
+router.get('/admin/all', adminAuth, async (req, res) => {
+  try {
+    const complaints = await pool.query(`
+      SELECT 
+        c.id,
+        c.complaint_id,
+        c.title,
+        c.description,
+        c.category,
+        c.location,
+        c.priority,
+        c.status,
+        c.created_at,
+        c.updated_at,
+        c.user_id,
+        u.full_name as user_name,
+        u.email as user_email,
+        ui.image_path as user_image,
+        STRING_AGG(CASE WHEN ca.file_type LIKE 'image%' THEN ca.file_path END, ',') as evidence_files,
+        STRING_AGG(CASE WHEN ca.file_type LIKE 'audio%' THEN ca.file_path END, ',') as voice_note
+      FROM complaints c
+      JOIN users u ON c.user_id = u.id
+      LEFT JOIN user_images ui ON u.id = ui.user_id
+      LEFT JOIN complaint_attachments ca ON c.id = ca.complaint_id
+      GROUP BY c.id, c.complaint_id, c.title, c.description, c.category, c.location, c.priority, c.status, c.created_at, c.updated_at, c.user_id, u.full_name, u.email, ui.image_path
+      ORDER BY c.created_at DESC
+    `);
+
+    res.json(complaints.rows);
+  } catch (error) {
+    console.error('Get all complaints error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Get all users (admin)
+router.get('/admin/users', adminAuth, async (req, res) => {
+  try {
+    const users = await pool.query(`
+      SELECT 
+        id,
+        user_id,
+        full_name,
+        email,
+        phone,
+        role,
+        created_at
+      FROM users
+      ORDER BY created_at DESC
+    `);
+
+    res.json(users.rows);
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Update complaint status (admin)
+router.put('/admin/:id/status', adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    const updatedComplaint = await pool.query(
+      'UPDATE complaints SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *',
+      [status, id]
+    );
+    
+    if (updatedComplaint.rows.length === 0) {
+      return res.status(404).json({ message: 'Complaint not found' });
+    }
+
+    // Emit notification to the user who owns the complaint
+    console.log('🚀 About to emit status update notification to user:', updatedComplaint.rows[0].user_id);
+    emitStatusUpdate(updatedComplaint.rows[0].user_id, updatedComplaint.rows[0]);
+    console.log('📫 Status update notification emission completed');
+    
+    res.json(updatedComplaint.rows[0]);
+  } catch (error) {
+    console.error('Update complaint status error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Dashboard statistics
+router.get('/dashboard/stats', auth, async (req, res) => {
+  try {
+    // Get total complaints count
+    const totalResult = await pool.query('SELECT COUNT(*) as total FROM complaints');
+    const total = parseInt(totalResult.rows[0].total);
+
+    // Get counts by status
+    const statusResult = await pool.query(
+      'SELECT status, COUNT(*) as count FROM complaints GROUP BY status'
+    );
+    const statusCounts = statusResult.rows.reduce((acc, row) => {
+      acc[row.status] = parseInt(row.count);
+      return acc;
+    }, {});
+
+    // Get complaints by category
+    const categoryResult = await pool.query(
+      'SELECT category, COUNT(*) as count FROM complaints GROUP BY category ORDER BY count DESC'
+    );
+    const categories = categoryResult.rows;
+
+    // Get monthly trends (last 6 months)
+    const trendsResult = await pool.query(`
+      SELECT 
+        DATE_TRUNC('month', created_at) as month,
+        COUNT(*) as total_complaints,
+        COUNT(CASE WHEN status = 'resolved' THEN 1 END) as resolved_complaints
+      FROM complaints 
+      WHERE created_at >= NOW() - INTERVAL '6 months'
+      GROUP BY DATE_TRUNC('month', created_at)
+      ORDER BY month
+    `);
+    const trends = trendsResult.rows;
+
+    res.json({
+      total,
+      pending: statusCounts.pending || 0,
+      in_progress: statusCounts.in_progress || 0,
+      resolved: statusCounts.resolved || 0,
+      categories,
+      trends
+    });
+  } catch (error) {
+    console.error('Dashboard stats error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
