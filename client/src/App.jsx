@@ -12,10 +12,12 @@ import ComplaintHistory from './screens/User/ComplaintHistory';
 import Profile from './screens/User/Profile';
 import AdminLayout from './screens/Cyber/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import Toast from './components/Toast';
 
 function App() {
   return (
     <Router>
+      <Toast />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />

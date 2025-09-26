@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('../config/database');
 const { auth, adminAuth } = require('../middleware/auth');
+const { emitNewComplaint, emitStatusUpdate } = require('../socket');
 const router = express.Router();
 
 // Generate complaint ID
@@ -25,6 +26,16 @@ router.post('/', auth, async (req, res) => {
       'INSERT INTO complaints (user_id, complaint_id, title, description, category, location, priority, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
       [userId, complaintId, title, description, category, location, priority || 'medium', 'pending']
     );
+
+    // Get user name for notification
+    const userResult = await pool.query('SELECT full_name FROM users WHERE id = $1', [userId]);
+    const userName = userResult.rows[0]?.full_name || 'Unknown User';
+    console.log('📝 User name for notification:', userName);
+
+    // Emit notification to admins
+    console.log('🚀 About to emit new complaint notification');
+    emitNewComplaint(newComplaint.rows[0], userName);
+    console.log('📫 Notification emission completed');
 
     console.log('✅ Complaint created:', newComplaint.rows[0]);
     res.status(201).json({
@@ -140,6 +151,11 @@ router.put('/admin/:id/status', adminAuth, async (req, res) => {
     if (updatedComplaint.rows.length === 0) {
       return res.status(404).json({ message: 'Complaint not found' });
     }
+
+    // Emit notification to the user who owns the complaint
+    console.log('🚀 About to emit status update notification to user:', updatedComplaint.rows[0].user_id);
+    emitStatusUpdate(updatedComplaint.rows[0].user_id, updatedComplaint.rows[0]);
+    console.log('📫 Status update notification emission completed');
     
     res.json(updatedComplaint.rows[0]);
   } catch (error) {

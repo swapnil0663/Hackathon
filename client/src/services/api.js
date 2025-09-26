@@ -22,7 +22,7 @@ const api = {
     }
   },
 
-  register: async (userData) => {
+  register: async (userData, imageBlob = null) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -33,6 +33,17 @@ const api = {
       if (!response.ok) {
         throw new Error(data.message || 'Registration failed');
       }
+      
+      // Upload image if provided
+      if (imageBlob && data.user) {
+        try {
+          await api.uploadUserImage(imageBlob, data.user.id);
+        } catch (imageError) {
+          console.error('Image upload failed:', imageError);
+          // Don't fail registration if image upload fails
+        }
+      }
+      
       return data;
     } catch (error) {
       console.error('API Register Error:', error);
@@ -110,6 +121,35 @@ const api = {
     return response.json();
   },
 
+  uploadUserImage: async (imageBlob, userId) => {
+    const formData = new FormData();
+    formData.append('image', imageBlob, 'user-photo.jpg');
+    formData.append('userId', userId);
+    
+    const response = await fetch(`${API_BASE_URL}/upload/user-image`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to upload image');
+    }
+    return data;
+  },
+
+  getUserImage: async (userId) => {
+    const response = await fetch(`${API_BASE_URL}/upload/user-image/${userId}`);
+    if (response.status === 404) {
+      return null; // No image found
+    }
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch user image');
+    }
+    return data;
+  },
+
   getAllUsers: async () => {
     const token = tokenManager.getToken();
     const response = await fetch(`${API_BASE_URL}/complaints/admin/users`, {
@@ -135,6 +175,22 @@ const api = {
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.message || 'Failed to update status');
+    }
+    return data;
+  },
+
+  uploadEvidence: async (file) => {
+    const formData = new FormData();
+    formData.append('evidence', file);
+    
+    const response = await fetch(`${API_BASE_URL}/upload/evidence`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to upload evidence');
     }
     return data;
   }

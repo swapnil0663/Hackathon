@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Plus, X, MapPin, Clock, User, FileText } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 const ComplaintManagement = () => {
@@ -47,11 +48,16 @@ const ComplaintManagement = () => {
       );
 
   const createAdminUser = async () => {
+    const loadingToast = toast.loading('Creating admin user...');
     try {
       const result = await api.createAdmin();
-      alert(`Admin created: Username: admin, Password: admin@123`);
+      toast.success('Admin created successfully!\nUsername: admin\nPassword: admin@123', {
+        id: loadingToast,
+        duration: 6000,
+      });
     } catch (error) {
       console.error('Error creating admin:', error);
+      toast.error('Failed to create admin user', { id: loadingToast });
     }
   };
 
@@ -86,14 +92,17 @@ const ComplaintManagement = () => {
   };
 
   const updateStatus = async (newStatus) => {
+    const loadingToast = toast.loading('Updating status...');
     try {
       await api.updateComplaintStatus(selectedComplaint.id, newStatus);
       setComplaints(complaints.map(c => 
         c.id === selectedComplaint.id ? { ...c, status: newStatus } : c
       ));
       setSelectedComplaint({ ...selectedComplaint, status: newStatus });
+      toast.success('Status updated successfully!', { id: loadingToast });
     } catch (error) {
       console.error('Error updating status:', error);
+      toast.error('Failed to update status', { id: loadingToast });
     }
   };
 

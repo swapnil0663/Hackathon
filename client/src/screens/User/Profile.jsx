@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { User, Mail, Phone, Edit, Save, X } from 'lucide-react';
 import Layout from '../../components/Layout';
 import tokenManager from '../../utils/sessionManager';
+import api from '../../services/api';
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [userImage, setUserImage] = useState(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -21,8 +23,23 @@ const Profile = () => {
         email: userData.email || '',
         phone: userData.phone || ''
       });
+      
+      // Fetch user image
+      fetchUserImage(userData.id);
     }
   }, []);
+
+  const fetchUserImage = async (userId) => {
+    try {
+      const imageData = await api.getUserImage(userId);
+      if (imageData) {
+        setUserImage(`http://localhost:5000/${imageData.image_path}`);
+      }
+    } catch (error) {
+      // Silently handle error - user just won't see profile image
+      console.log('No profile image found for user');
+    }
+  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -85,8 +102,18 @@ const Profile = () => {
 
           <div className="space-y-6">
             <div className="flex items-center space-x-4">
-              <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center">
-                <User size={32} className="text-white" />
+              <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-blue-200">
+                {userImage ? (
+                  <img 
+                    src={userImage} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-blue-600 flex items-center justify-center">
+                    <User size={32} className="text-white" />
+                  </div>
+                )}
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-gray-800">{user?.fullName || 'User Name'}</h3>

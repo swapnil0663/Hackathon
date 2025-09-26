@@ -55,9 +55,19 @@ CREATE TABLE complaint_status_history (
     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- User images table
+CREATE TABLE user_images (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    image_path VARCHAR(500) NOT NULL,
+    image_name VARCHAR(255) NOT NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for better performance
 CREATE INDEX idx_complaints_user_id ON complaints(user_id);
 CREATE INDEX idx_complaints_status ON complaints(status);
 CREATE INDEX idx_complaints_created_at ON complaints(created_at);
 CREATE INDEX idx_complaint_attachments_complaint_id ON complaint_attachments(complaint_id);
 CREATE INDEX idx_complaint_status_history_complaint_id ON complaint_status_history(complaint_id);
+CREATE INDEX idx_user_images_user_id ON user_images(user_id);

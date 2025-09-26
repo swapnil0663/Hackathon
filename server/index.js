@@ -1,21 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
-const { Server } = require('socket.io');
 require('dotenv').config();
 const pool = require('./config/database');
+const { initializeSocket } = require('./socket');
 
 const authRoutes = require('./routes/auth');
 const complaintRoutes = require('./routes/complaints');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: 'http://localhost:5173',
-    methods: ['GET', 'POST']
-  }
-});
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -41,6 +36,10 @@ pool.connect((err, client, release) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
+app.use('/api/upload', uploadRoutes);
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 
 // Health check
 app.get('/', (req, res) => {
@@ -52,16 +51,8 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working!', timestamp: new Date().toISOString() });
 });
 
-// Socket.IO connection handling
-io.on('connection', (socket) => {
-  console.log('👤 Admin connected:', socket.id);
-
-  socket.on('disconnect', () => {
-    console.log('👋 Admin disconnected:', socket.id);
-  });
-});
-
-// Make io available globally
+// Initialize Socket.IO
+const io = initializeSocket(server);
 app.set('io', io);
 
 server.listen(PORT, () => {

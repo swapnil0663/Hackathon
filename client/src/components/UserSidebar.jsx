@@ -1,5 +1,6 @@
-import { FileText, Plus, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { FileText, Plus, Clock, CheckCircle, AlertCircle, Shield, Activity } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const UserSidebar = () => {
   const navigate = useNavigate();
@@ -14,34 +15,78 @@ const UserSidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-gradient-to-b from-gray-50 to-white border-r border-gray-200 h-screen shadow-lg fixed left-0 top-19 z-10">
+    <motion.div 
+      initial={{ x: -250 }}
+      animate={{ x: 0 }}
+      transition={{ duration: 0.3 }}
+      className="w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 h-screen shadow-2xl fixed left-0 top-19 z-10"
+    >
       <div className="p-6">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Cyber Crime Portal</h2>
-          <div className="h-1 w-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
-        </div>        
-        <nav className="space-y-3">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+        </motion.div>        
+        
+        <nav className="space-y-2">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             return (
-              <button
+              <motion.div
                 key={index}
-                onClick={() => navigate(item.path)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 group ${
-                  isActive
-                    ? 'bg-white text-indigo-700 border border-indigo-200 shadow-md' 
-                    : 'text-gray-700 hover:bg-white hover:text-gray-800 hover:shadow-md hover:border hover:border-gray-200'
-                }`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Icon size={20} className={isActive ? 'text-indigo-600' : item.color + ' group-hover:text-gray-700'} />
-                <span className="font-medium">{item.label}</span>
-              </button>
+                <button
+                  onClick={() => navigate(item.path)}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-left transition-all duration-200 group ${
+                    isActive
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25' 
+                      : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg transition-colors ${
+                    isActive ? 'bg-white/20' : 'bg-slate-700 group-hover:bg-slate-600'
+                  }`}>
+                    <Icon size={16} className={isActive ? 'text-white' : 'text-slate-300'} />
+                  </div>
+                  <span className="font-medium">{item.label}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="userActiveIndicator"
+                      className="ml-auto w-2 h-2 bg-white rounded-full"
+                    />
+                  )}
+                </button>
+              </motion.div>
             );
           })}
         </nav>
+        
+        <div className="absolute bottom-6 left-6 right-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-slate-800/50 rounded-xl p-4 border border-slate-700"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Activity className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-slate-300">Portal Status</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-xs text-green-400">Secure Connection</span>
+            </div>
+          </motion.div>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

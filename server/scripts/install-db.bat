@@ -15,5 +15,5 @@ echo Running database installation script...
 node scripts/install-database.js
 
 echo.
-echo Database installation complete!
+echo Database installation complete!    
 pause
